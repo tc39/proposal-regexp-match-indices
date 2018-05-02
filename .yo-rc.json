@@ -1,0 +1,20 @@
+{
+  "generator-ecmascript-proposal": {
+    "promptValues": {
+      "hasChampion": true,
+      "championName": "Ron Buckton",
+      "championGithub": "rbuckton",
+      "spec": "https://rbuckton.github.io/proposal-regexp-match-offsets",
+      "stage": "0",
+      "sections": [
+        "prior-art",
+        "semantics",
+        "examples",
+        "api",
+        "references"
+      ],
+      "build": "gulp",
+      "vscode": true
+    }
+  }
+}
