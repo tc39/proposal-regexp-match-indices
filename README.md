@@ -82,7 +82,9 @@ m2.offsets.groups["Z"] === -1;
 <!--#endregion:examples-->
 
 <!--#region:api-->
+<!-- 
 # API
+
 ```ts
 interface RegExpExecArray extends Array<string> {
   index: number;
@@ -93,7 +95,8 @@ interface RegExpExecArray extends Array<string> {
 interface RegExpOffsetsArray extends Array<string> {
   groups: { [groupName: string]: number } | undefined;
 }
-```
+``` 
+-->
 <!--#endregion:api-->
 
 <!--#region:grammar-->
