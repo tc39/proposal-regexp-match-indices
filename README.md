@@ -5,6 +5,8 @@ ECMAScript `RegExp` match array offsets provide additional information about the
 captured substring relative to the `index` of the match.
 
 An example implementation can be found in [`regexp-measure`](https://www.npmjs.com/package/regexp-measure).
+
+* [Stage 0 Presentation](https://docs.google.com/presentation/d/12I8W-uViPXuFu2IAk3yZpXTr5MxLYxCfhJValykyT0E/edit?usp=sharing)
 <!--#endregion:intro-->
 
 <!--#region:status-->
