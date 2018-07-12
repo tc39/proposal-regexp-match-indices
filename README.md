@@ -49,6 +49,9 @@ of the match within the input (`-1` if unmatched), the end position of the match
 itself does not change (it still would have own `index`, `input`, and (optional) `groups` 
 properties), but rather the value of each element would merely be the result as mapped through the 
 provided mapping function. 
+
+In addition, we propose a similar change to both `String.prototype.match` and 
+`String.prototype.matchAll`.
 <!--#endregion:motivations-->
 
 <!--#region:prior-art-->
