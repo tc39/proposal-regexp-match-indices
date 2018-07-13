@@ -1,0 +1,455 @@
+<emu-clause id="sec-pattern-semantics">
+  <h1>Pattern Semantics</h1>
+
+  <emu-clause id="sec-notation">
+    <h1>Notation</h1>
+    <p>The descriptions below use the following variables:</p>
+    <ul>
+      <li>
+        _Input_ is a List consisting of all of the characters, in order, of the String being matched by the regular expression pattern. Each character is either a code unit or a code point, depending upon the kind of pattern involved. The notation _Input_[_n_] means the _n_<sup>th</sup> character of _Input_, where _n_ can range between 0 (inclusive) and _InputLength_ (exclusive).
+      </li>
+      <li>
+        _InputLength_ is the number of characters in _Input_.
+      </li>
+      <li>
+        _NcapturingParens_ is the total number of left-capturing parentheses (i.e. the total number of <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> Parse Nodes) in the pattern. A left-capturing parenthesis is any `(` pattern character that is matched by the `(` terminal of the <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> production.
+      </li>
+      <li>
+        _DotAll_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"s"` and otherwise is *false*.
+      </li>
+      <li>
+        _IgnoreCase_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"i"` and otherwise is *false*.
+      </li>
+      <li>
+        _Multiline_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"m"` and otherwise is *false*.
+      </li>
+      <li>
+        _Unicode_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"u"` and otherwise is *false*.
+      </li>
+    </ul>
+    <p>Furthermore, the descriptions below use the following internal data structures:</p>
+    <ul>
+      <li>
+        A <em>CharSet</em> is a mathematical set of characters, either code units or code points depending up the state of the _Unicode_ flag. &ldquo;All characters&rdquo; means either all code unit values or all code point values also depending upon the state of _Unicode_.
+      </li>
+      <li>
+        <ins>A <em>Range</em> is an ordered pair (_startIndex_, _endIndex_) represents the range of characters included in a capture, where _startIndex_ is an integer representing the start index (inclusive) and _endIndex_ is an integer representing the end index (exclusive)</ins>
+      </li>
+      <li>
+        A <em>State</em> is an ordered pair (_endIndex_, _captures_) where _endIndex_ is an integer and _captures_ is a List of _NcapturingParens_ values. States are used to represent partial match states in the regular expression matching algorithms. The _endIndex_ is one plus the index of the last input character matched so far by the pattern, while _captures_ holds the results of capturing parentheses. The _n_<sup>th</sup> element of _captures_ is either a List that represents the <del>value</del><ins><em>Range</em></ins> obtained by the _n_<sup>th</sup> set of capturing parentheses or *undefined* if the _n_<sup>th</sup> set of capturing parentheses hasn't been reached yet. Due to backtracking, many States may be in use at any time during the matching process.
+      </li>
+      <li>
+        A <em>MatchResult</em> is either a State or the special token ~failure~ that indicates that the match failed.
+      </li>
+      <li>
+        A <em>Continuation</em> procedure is an internal closure (i.e. an internal procedure with some arguments already bound to values) that takes one State argument and returns a MatchResult result. If an internal closure references variables which are bound in the function that creates the closure, the closure uses the values that these variables had at the time the closure was created. The Continuation attempts to match the remaining portion (specified by the closure's already-bound arguments) of the pattern against _Input_, starting at the intermediate state given by its State argument. If the match succeeds, the Continuation returns the final State that it reached; if the match fails, the Continuation returns ~failure~.
+      </li>
+      <li>
+        A <em>Matcher</em> procedure is an internal closure that takes two arguments &mdash; a State and a Continuation &mdash; and returns a MatchResult result. A Matcher attempts to match a middle subpattern (specified by the closure's already-bound arguments) of the pattern against _Input_, starting at the intermediate state given by its State argument. The Continuation argument should be a closure that matches the rest of the pattern. After matching the subpattern of a pattern to obtain a new State, the Matcher then calls Continuation on that new State to test if the rest of the pattern can match as well. If it can, the Matcher returns the State returned by Continuation; if not, the Matcher may try different choices at its choice points, repeatedly calling Continuation until it either succeeds or all possibilities have been exhausted.
+      </li>
+      <li>
+        An <em>AssertionTester</em> procedure is an internal closure that takes a State argument and returns a Boolean result. The assertion tester tests a specific condition (specified by the closure's already-bound arguments) against the current place in _Input_ and returns *true* if the condition matched or *false* if not.
+      </li>
+    </ul>
+  </emu-clause>
+
+  <emu-clause id="sec-atom">
+    <h1>Atom</h1>
+    <p>With parameter _direction_.</p>
+    <p>The production <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> evaluates as follows:</p>
+    <emu-alg>
+      1. Evaluate |Disjunction| with argument _direction_ to obtain a Matcher _m_.
+      1. Let _parenIndex_ be the number of left-capturing parentheses in the entire regular expression that occur to the left of this |Atom|. This is the total number of <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> Parse Nodes prior to or enclosing this |Atom|.
+      1. Return an internal Matcher closure that takes two arguments, a State _x_ and a Continuation _c_, and performs the following steps:
+        1. Let _d_ be an internal Continuation closure that takes one State argument _y_ and performs the following steps:
+          1. Let _cap_ be a copy of _y_'s _captures_ List.
+          1. Let _xe_ be _x_'s _endIndex_.
+          1. Let _ye_ be _y_'s _endIndex_.
+          1. If _direction_ is equal to +1, then
+            1. Assert: _xe_ &le; _ye_.
+            1. <del>Let _s_ be a new List whose elements are the characters of _Input_ at indices _xe_ (inclusive) through _ye_ (exclusive).</del>
+            1. <ins>Let _r_ be the Range (_xe_, _ye_).</ins>
+          1. Else,
+            1. Assert: _direction_ is equal to -1.
+            1. Assert: _ye_ &le; _xe_.
+            1. <del>Let _s_ be a new List whose elements are the characters of _Input_ at indices _ye_ (inclusive) through _xe_ (exclusive).</del>
+            1. <ins>Let _r_ be the Range (_ye_, _xe_).</ins>
+          1. Set _cap_[_parenIndex_+1] to <del>_s_</del><ins>_r_</ins>.
+          1. Let _z_ be the State (_ye_, _cap_).
+          1. Call _c_(_z_) and return its result.
+        1. Call _m_(_x_, _d_) and return its result.
+    </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="sec-atomescape">
+    <h1>AtomEscape</h1>
+    <emu-clause id="sec-backreference-matcher" aoid="BackreferenceMatcher">
+      <h1>Runtime Semantics: BackreferenceMatcher ( _n_, _direction_ )</h1>
+      <p>The abstract operation BackreferenceMatcher takes two arguments, an integer _n_ and an integer _direction_, and performs the following steps:</p>
+      <emu-alg>
+        1. Return an internal Matcher closure that takes two arguments, a State _x_ and a Continuation _c_, and performs the following steps:
+          1. Let _cap_ be _x_'s _captures_ List.
+          1. Let <del>_s_</del><ins>_r_</ins> be _cap_[_n_].
+          1. If <del>_s_</del><ins>_r_</ins> is *undefined*, return _c_(_x_).
+          1. Let _e_ be _x_'s _endIndex_.
+          1. Let _len_ be <del>the number of elements in _s_</del><ins>_r_._endIndex_ - _r_._startIndex_</ins>.
+          1. Let _f_ be _e_ + _direction_ &times; _len_.
+          1. If _f_ &lt; 0 or _f_ &gt; _InputLength_, return ~failure~.
+          1. Let _g_ be min(_e_, _f_).
+          1. If there exists an integer _i_ between 0 (inclusive) and _len_ (exclusive) such that Canonicalize(<del>_s_[_i_]</del><ins>_Input_[_r_._startIndex_ + _i_]</ins>) is not the same character value as Canonicalize(_Input_[_g_ + _i_]), return ~failure~.
+          1. Let _y_ be the State (_f_, _cap_).
+          1. Call _c_(_y_) and return its result.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>
+
+<emu-clause id="sec-properties-of-the-regexp-prototype-object">
+  <h1>Properties of the RegExp Prototype Object</h1>
+
+  <emu-clause id="sec-regexp.prototype.exec">
+      <h1>RegExp.prototype.exec ( _string_ <ins>[, _mapfn_ ]</ins> )</h1>
+      <p>Performs a regular expression match of _string_ against the regular expression and returns an Array object containing the results of the match, or *null* if _string_ did not match.</p>
+      <p>The String ToString(_string_) is searched for an occurrence of the regular expression pattern as follows:</p>
+      <emu-alg>
+      1. Let _R_ be the *this* value.
+      1. If Type(_R_) is not Object, throw a *TypeError* exception.
+      1. If _R_ does not have a [[RegExpMatcher]] internal slot, throw a *TypeError* exception.
+      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+      1. Let _S_ be ? ToString(_string_).
+      1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _mapfn_</ins>).
+      </emu-alg>
+
+      <emu-clause id="sec-regexpexec" aoid="RegExpExec">
+        <h1>Runtime Semantics: RegExpExec ( _R_, _S_<ins>, _mapfn_</ins> )</h1>
+        <p>The abstract operation RegExpExec with arguments <del>_R_ and _S_</del><ins>_R_, _S_, and _mapfn_</ins> performs the following steps:</p>
+        <emu-alg>
+        1. Assert: Type(_R_) is Object.
+        1. Assert: Type(_S_) is String.
+        1. <ins>Assert: _mapfn_ is *undefined* or IsCallable(_mapfn_) is *true*.</ins>
+        1. Let _exec_ be ? Get(_R_, `"exec"`).
+        1. If IsCallable(_exec_) is *true*, then
+        1. Let _result_ be ? Call(_exec_, _R_, &laquo; _S_<ins>, _mapfn_</ins> &raquo;).
+        1. If Type(_result_) is neither Object or Null, throw a *TypeError* exception.
+        1. Return _result_.
+        1. If _R_ does not have a [[RegExpMatcher]] internal slot, throw a *TypeError* exception.
+        1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _mapfn_</ins>).
+        </emu-alg>
+        <emu-note>
+          <p>If a callable `exec` property is not found this algorithm falls back to attempting to use the built-in RegExp matching algorithm. This provides compatible behaviour for code written for prior editions where most built-in algorithms that use regular expressions did not perform a dynamic property lookup of `exec`.</p>
+        </emu-note>
+      </emu-clause>
+
+      <emu-clause id="sec-regexpbuiltinexec" aoid="RegExpBuiltinExec">
+        <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ <ins>, _mapfn_</ins> )</h1>
+        <p>The abstract operation RegExpBuiltinExec with arguments _R_<del> and</del><ins>,</ins> _S_ <ins>and _mapfn_</ins> performs the following steps:</p>
+        <emu-alg>
+        1. Assert: _R_ is an initialized RegExp instance.
+        1. Assert: Type(_S_) is String.
+        1. <ins>Let _mapped_ be IsCallable(_mapfn_).</ins>
+        1. <ins>Assert: _mapfn_ is *undefined* or _mapped_ is *true*.</ins>
+        1. Let _length_ be the number of code units in _S_.
+        1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
+        1. Let _flags_ be _R_.[[OriginalFlags]].
+        1. If _flags_ contains `"g"`, let _global_ be *true*, else let _global_ be *false*.
+        1. If _flags_ contains `"y"`, let _sticky_ be *true*, else let _sticky_ be *false*.
+        1. If _global_ is *false* and _sticky_ is *false*, set _lastIndex_ to 0.
+        1. Let _matcher_ be _R_.[[RegExpMatcher]].
+        1. If _flags_ contains `"u"`, let _fullUnicode_ be *true*, else let _fullUnicode_ be *false*.
+        1. Let _matchSucceeded_ be *false*.
+        1. Let _Input_ be a List consisting of all of the characters, in order, of _S_. If _fullUnicode_ is *true*, each character is a code unit, otherwise each character is a code point.
+        1. Repeat, while _matchSucceeded_ is *false*
+          1. If _lastIndex_ &gt; _length_, then
+            1. If _global_ is *true* or _sticky_ is *true*, then
+              1. Perform ? Set(_R_, `"lastIndex"`, 0, *true*).
+            1. Return *null*.
+          1. Let _r_ be _matcher_(_Input_, _lastIndex_).
+          1. If _r_ is ~failure~, then
+            1. If _sticky_ is *true*, then
+              1. Perform ? Set(_R_, `"lastIndex"`, 0, *true*).
+              1. Return *null*.
+            1. Set _lastIndex_ to AdvanceStringIndex(_S_, _lastIndex_, _fullUnicode_).
+          1. Else,
+            1. Assert: _r_ is a State.
+            1. Set _matchSucceeded_ to *true*.
+        1. Let _e_ be _r_'s _endIndex_ value.
+        1. If _fullUnicode_ is *true*, then
+          1. _e_ is an index into the _Input_ character list. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.
+          1. Set _e_ to _eUTF_.
+        1. If _global_ is *true* or _sticky_ is *true*, then
+          1. Perform ? Set(_R_, `"lastIndex"`, _e_, *true*).
+        1. Let _n_ be the number of elements in _r_'s _captures_ List. (This is the same value as <emu-xref href="#sec-notation"></emu-xref>'s _NcapturingParens_.)
+        1. Assert: _n_ &lt; 2<sup>32</sup>-1.
+        1. Let _A_ be ! ArrayCreate(_n_ + 1).
+        1. Assert: The value of _A_'s `"length"` property is _n_ + 1.
+        1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
+        1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
+        1. <ins>If _mapped_ is *true*, then</ins>
+          1. <ins>Let _matchedValue_ be Call(_mapfn_, *undefined*, &laquo; _lastIndex_, _e_, _S_ &raquo;).</ins>
+        1. <ins>Else,</ins>
+          1. <ins>Let _matchedValue_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</ins>
+        1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
+        1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
+        1. If _R_ contains any |GroupName|, then
+          1. Let _groups_ be ObjectCreate(*null*).
+        1. Else,
+          1. Let _groups_ be *undefined*.
+        1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
+        1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, do
+          1. Let _captureI_ be _i_<sup>th</sup> element of _r_'s _captures_ List.
+          1. <del>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</del>
+          1. <del>Else if _fullUnicode_ is *true*, then</del>
+            1. <del>Assert: _captureI_ is a List of code points.</del>
+            1. <del>Let _capturedValue_ be the String value whose code units are the UTF16Encoding of the code points of _captureI_.</del>
+          1. <del>Else _fullUnicode_ is *false*,</del>
+            1. <del>Assert: _captureI_ is a List of code units.</del>
+            1. <del>Let _capturedValue_ be the String value consisting of the code units of _captureI_.</del>
+          1. <ins>If _mapped_ is *true*, then</ins>
+            1. <ins>If _captureI_ is *undefined*, then</ins>
+              1. <ins>Let _captureStart_ be `-1`.</ins>
+              1. <ins>Let _captureEnd_ be `-1`.</ins>
+            1. <ins>Else,</ins>
+              1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
+              1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
+            1. <ins>Let _captureValue_ be ? Call(_mapfn_, *undefined*, &laquo; _captureStart_, _captureEnd_, _S_ &raquo;).</ins>
+          1. <ins>Else,</ins>
+            1. <ins>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</ins>
+            1. <ins>Else,</ins>
+              1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
+              1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
+              1. <ins>Let _captureChars_ be a new List whose elements are the characters of _Input_ at indicies _captureStart_ (inclusive) through _captureEnd_ (exclusive).</ins>
+              1. <ins>If _fullUnicode_ is *true*, then</ins>
+                1. <ins>Assert: _captureChars_ is a List of code points.</ins>
+                1. <ins>Let _capturedValue_ be the String value whose code units are the UTF16Encoding of the code points of _captureChars_.</ins>
+              1. <ins>Else _fullUnicode_ is *false*,</ins>
+                1. <ins>Assert: _captureChars_ is a List of code units.</ins>
+                1. <ins>Let _capturedValue_ be the String value consisting of the code units of _captureChars_.</ins>
+          1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
+          1. If the _i_th capture of _R_ was defined with a |GroupName|, then
+            1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
+            1. Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).
+        1. Return _A_.
+        </emu-alg>
+      </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-regexp.prototype-@@match">
+    <h1>RegExp.prototype [ @@match ] ( _string_ <ins>[, _mapfn_ ]</ins> )</h1>
+    <p>When the `@@match` method is called with argument _string_ <ins> and optional argument _mapfn_</ins>, the following steps are taken:</p>
+    <emu-alg>
+      1. Let _rx_ be the *this* value.
+      1. If Type(_rx_) is not Object, throw a *TypeError* exception.
+      1. <ins>Let _mapped_ be IsCallable(_mapfn_).</ins>
+      1. <ins>If _mapfn_ is not *undefined* and _mapped_ is *false*, throw a *TypeError* exception.</ins>
+      1. Let _S_ be ? ToString(_string_).
+      1. Let _global_ be ToBoolean(? Get(_rx_, `"global"`)).
+      1. If _global_ is *false*, then
+        1. Return ? RegExpExec(_rx_, _S_<ins>, _mapfn_</ins>).
+      1. Else _global_ is *true*,
+        1. Let _fullUnicode_ be ToBoolean(? Get(_rx_, `"unicode"`)).
+        1. Perform ? Set(_rx_, `"lastIndex"`, 0, *true*).
+        1. Let _A_ be ! ArrayCreate(0).
+        1. Let _n_ be 0.
+        1. <ins>If _mapped_ is *true*, let _f_ be a new RegExp match offsets function.</ins>
+        1. <ins>Otherwise, let _f_ be *undefined*.</ins>
+        1. Repeat,
+          1. Let _result_ be ? RegExpExec(_rx_, _S_<ins>, _f_</ins>).
+          1. If _result_ is *null*, then
+            1. If _n_=0, return *null*.
+            1. Return _A_.
+          1. Else _result_ is not *null*,
+            1. <ins>If _mapped_ is *true*, then</ins>
+              1. <ins>Let _matchRange_ be ? Get(_result_, `"0"`).</ins>
+              1. <ins>Let _matchStart_ be ? Get(_matchRange_, `"0"`).</ins>
+              1. <ins>Let _matchEnd_ be ? Get(_matchRange_, `"1"`).</ins>
+              1. <ins>Let _matchValue_ be ? Call(_mapfn_, *undefined*, &laquo; _matchStart_, _matchEnd_, _S_ &raquo;)</ins>
+              1. <ins>If either of _matchStart_ or _matchEnd_ are `-1`, let _matched_ be *false*.</ins>
+              1. <ins>Otherwise, let _matched_ be *true*.</ins>
+            1. <ins>Else,</ins>
+              1. <ins>Let _matchValue_ be ? ToString(? Get(_result_, `"0"`)).</ins>
+              1. <ins>If _matchStr_ is the empty String, let _matched_ be *false*.</ins>
+              1. <ins>Otherwise, let _matched_ be *true*.</ins>
+            1. <del>Let _matchStr_ be ? ToString(? Get(_result_, `"0"`)).</del>
+            1. Let _status_ be CreateDataProperty(_A_, ! ToString(_n_), <del>_matchStr_</del><ins>_matchValue</ins>).
+            1. Assert: _status_ is *true*.
+            1. If <del>_matchStr_ is the empty String</del><ins>_matched_ is *false*</ins>, then
+              1. Let _thisIndex_ be ? ToLength(? Get(_rx_, `"lastIndex"`)).
+              1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
+              1. Perform ? Set(_rx_, `"lastIndex"`, _nextIndex_, *true*).
+            1. Increment _n_.
+    </emu-alg>
+    <p>The value of the `name` property of this function is `"[Symbol.match]"`.</p>
+    <emu-note>
+      <p>The @@match property is used by the IsRegExp abstract operation to identify objects that have the basic behaviour of regular expressions. The absence of a @@match property or the existence of such a property whose value does not Boolean coerce to *true* indicates that the object is not intended to be used as a regular expression object.</p>
+    </emu-note>
+
+    <emu-clause id="sec-regexp-match-offset-functions">
+      <h1>RegExp Match Offsets Functions</h1>
+      <p>A <dfn>RegExp match offsets function</dfn> is an anonymous built-in function.</p>
+      <p>When a RegExp match offsets function _F_ is called with arguments _startIndex_, _endIndex_, the following steps are taken:</p>
+      <emu-alg>
+        1. Let _A_ be !ArrayCreate(2).
+        1. Perform ? CreateDataProperty(_A_, `"0"`, _startIndex_).
+        1. Perform ? CreateDataProperty(_A_, `"1"`, _endIndex_).
+        1. Return _A_.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-regexp-prototype-matchall">
+    <h1>RegExp.prototype [ @@matchAll ] ( _string_ <ins>[, _mapfn_]</ins>)</h1>
+    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+
+    <p>When the `@@matchAll` method is called with argument _string_ <ins> and optional argument _mapfn_</ins>, the following steps are taken:</p>
+    <emu-alg>
+      1. Let _R_ be the *this* value.
+      1. If Type(_R_) is not Object, throw a *TypeError* exception.
+      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+      1. Return ? MatchAllIterator(_R_, _string_<ins>, _mapfn_</ins>).
+    </emu-alg>
+    <p>The value of the *name* property of this function is *"[Symbol.matchAll]"*.</p>
+  </emu-clause>
+
+  <emu-clause id="sec-matchalliterator" aoid="MatchAllIterator">
+    <h1>MatchAllIterator ( _R_, _O_<ins>, _mapfn_</ins> )</h1>
+    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+
+    <p>The abstract operation _MatchAllIterator_ performs the following steps:</p>
+    <emu-alg>
+      1. Let _S_ be ? ToString(_O_).
+      1. If ? IsRegExp(_R_) is `true`, then
+        1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
+        1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
+        1. Let _matcher_ be ? Construct(_C_, &laquo; _R_, _flags_ &raquo;).
+        1. Let _global_ be ? ToBoolean(? Get(_matcher_, `"global"`)).
+        1. Let _fullUnicode_ be ? ToBoolean(? Get(_matcher_, `"unicode"`).
+        1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
+        1. Perform ? Set(_matcher_, `"lastIndex"`, _lastIndex_, *true*).
+      1. Else,
+        1. Let _flags_ be `"g"`.
+        1. Let _matcher_ be ? RegExpCreate(_R_, _flags_).
+        1. Let _global_ be *true*.
+        1. Let _fullUnicode_ be *false*.
+        1. Assert: ! Get(_matcher_, `"lastIndex"`) is *0*.
+      1. Return ! CreateRegExpStringIterator(_matcher_, _S_, _global_, _fullUnicode_<ins>, _mapfn_</ins>).
+    </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="sec-createregexpstringiterator" aoid="CreateRegExpStringIterator">
+    <h1>CreateRegExpStringIterator ( _R_, _S_, _global_, _fullUnicode_<ins>, _mapfn_</ins> )</h1>
+    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+
+    <p>The abstract operation _CreateRegExpStringIterator_ is used to create such iterator objects. It performs the following steps:</p>
+    <emu-alg>
+      1. Assert: Type(_S_) is String.
+      1. Assert: Type(_global_) is Boolean.
+      1. Assert: Type(_fullUnicode_) is Boolean.
+      1. <ins>Assert: _mapfn_ is *undefined* or IsCallable(_mapfn_) is *true*.</ins>
+      1. Let _iterator_ be ObjectCreate(<emu-xref href="#%RegExpStringIteratorPrototype%">%RegExpStringIteratorPrototype%</emu-xref>, &laquo; [[IteratingRegExp]], [[IteratedString]], [[Global]], [[Unicode]]<ins>, [[Mapper]], [[OffsetMapper]]</ins>, [[Done]] &raquo;).
+      1. Set _iterator_.[[IteratingRegExp]] to _R_.
+      1. Set _iterator_.[[IteratedString]] to _S_.
+      1. Set _iterator_.[[Global]] to _global_.
+      1. Set _iterator_.[[Unicode]] to _fullUnicode_.
+      1. <ins>Set _iterator_.[[Mapper]] to _mapfn_.</ins>
+      1. <ins>If _mapfn_ is not *undefined* and _global_ is *true*, let _f_ be a new RegExp match offsets function.</ins>
+      1. <ins>Otherwise, let _f_ be *undefined*.</ins>
+      1. <ins>Set _iterator_.[[OffsetMapper]] to _f_.</ins>
+      1. Set _iterator_.[[Done]] to *false*.
+      1. Return _iterator_.
+    </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="%RegExpStringIteratorPrototype%">
+    <h1>The %RegExpStringIteratorPrototype% Object</h1>
+    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+
+    <emu-clause id="%RegExpStringIteratorPrototype%.next">
+      <h1>%RegExpStringIteratorPrototype%.next ( )</h1>
+      <emu-alg>
+        1. Let _O_ be the *this* value.
+        1. If Type(_O_) is not Object, throw a *TypeError* exception.
+        1. If _O_ does not have all of the internal slots of a RegExp String Iterator Object Instance (see <emu-xref href="#PropertiesOfRegExpStringIteratorInstances"></emu-xref>), throw a *TypeError* exception.
+        1. If _O_.[[Done]] is *true*, then
+          1. Return ! CreateIterResultObject(*undefined*, *true*).
+        1. Let _R_ be _O_.[[IteratingRegExp]].
+        1. Let _S_ be _O_.[[IteratedString]].
+        1. Let _global_ be _O_.[[Global]].
+        1. Let _fullUnicode_ be _O_.[[Unicode]].
+        1. <ins>Let _mapfn_ be _O_.[[Mapper]].</ins>
+        1. <ins>Let _f_ be _O_.[[OffsetMapper]].</ins>
+        1. Let _match_ be ? RegExpExec(_R_, _S_<ins>, _f_</ins>).
+        1. If _match_ is *null*, then
+          1. Set _O_.[[Done]] to *true*.
+          1. Return ! CreateIterResultObject(*undefined*, *true*).
+        1. Else,
+          1. If _global_ is *true*,
+            1. <ins>If _mapfn_ is not *undefined*, then</ins>
+              1. <ins>Let _matchRange_ be ? Get(_match_, `"0"`).</ins>
+              1. <ins>Let _matchStart_ be ? Get(_matchRange_, `"0"`).</ins>
+              1. <ins>Let _matchEnd_ be ? Get(_matchRange_, `"1"`).</ins>
+              1. <ins>Let _matchValue_ be ? Call(_mapfn_, *undefined*, &laquo; _matchStart_, _matchEnd_, _S_ &raquo;)</ins>
+              1. <ins>If either of _matchStart_ or _matchEnd_ are `-1`, let _matched_ be *false*.</ins>
+              1. <ins>Otherwise, let _matched_ be *true*.</ins>
+            1. <ins>Else,</ins>
+              1. <ins>Let _matchValue_ be ? ToString(? Get(_match_, `"0"`)).</ins>
+              1. <ins>If _matchStr_ is the empty String, let _matched_ be *false*.</ins>
+              1. <ins>Otherwise, let _matched_ be *true*.</ins>
+            1. <del>Let _matchStr_ be ? ToString(? Get(_match_, `"0"`)).</del>
+            1. If <del>_matchStr_ is the empty string</del><ins>_matched_ is *false*</ins>,
+              1. Let _thisIndex_ be ? ToLength(? Get(_R_, *"lastIndex"*)).
+              1. Let _nextIndex_ be ! AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
+              1. Perform ? Set(_R_, *"lastIndex"*, _nextIndex_, *true*).
+            1. Return ! CreateIterResultObject(<del>_match_</del><ins>_matchValue_</ins>, *false*).
+          1. Else,
+            1. Set _O_.[[Done]] to *true*.
+            1. Return ! CreateIterResultObject(<del>_match_</del><ins>_matchValue_</ins>, *false*).
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="PropertiesOfRegExpStringIteratorInstances">
+      <h1>Properties of RegExp String Iterator Instances</h1>
+      <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+      <p>RegExp String Iterator instances are ordinary objects that inherit properties from the <emu-xref href="#%RegExpStringIteratorPrototype%">%RegExpStringIteratorPrototype%</emu-xref> intrinsic object. RegExp String Iterator instances are initially created with the internal slots listed in <a href="#table-1">Table 1</a>.</p>
+      <figure>
+        <figcaption><span id="table-1">Table 1</span> &ndash; Internal Slots of RegExp String Iterator Instances</figcaption>
+        <table class="real-table">
+          <tbody>
+            <tr>
+              <th>Internal Slot</th>
+              <th>Description</th>
+            </tr>
+            <tr>
+              <td>[[IteratingRegExp]]</td>
+              <td>The regular expression used for iteration. IsRegExp([[IteratingRegExp]]) is always initially *true*.</td>
+            </tr>
+            <tr>
+              <td>[[IteratedString]]</td>
+              <td>The String value being iterated upon.</td>
+            </tr>
+            <tr>
+              <td>[[Global]]</td>
+              <td>A Boolean value to indicate whether the [[IteratingRegExp]] is global or not.</td>
+            </tr>
+            <tr>
+              <td>[[Unicode]]</td>
+              <td>A Boolean value to indicate whether the [[IteratingRegExp]] is in Unicode mode or not.</td>
+            </tr>
+            <tr>
+              <td><ins>[[Mapper]]</ins></td>
+              <td><ins>Either *undefined*, or an ECMAScript function object used to map the offsets of a capture to a user-defined value.</ins></td>
+            </tr>
+            <tr>
+              <td><ins>[[OffsetMapper]]</ins></td>
+              <td><ins>Either *undefined*, or a RegeExp match offsets function.</ins></td>
+            </tr>
+            <tr>
+              <td>[[Done]]</td>
+              <td>A Boolean value to indicate whether the iteration is complete or not.</td>
+            </tr>
+            <tr>
+          </tbody>
+        </table>
+      </figure>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>
