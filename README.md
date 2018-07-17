@@ -5,6 +5,8 @@ ECMAScript `RegExp` match array offsets provide additional information about the
 captured substring relative to the `index` of the match.
 
 An example implementation can be found in [`regexp-measure`](https://www.npmjs.com/package/regexp-measure).
+> NOTE: `regexp-measure` was built around the Stage 0 proposal and is no longer up to date with respect to
+> the current proposed API design.
 
 * [Stage 0 Presentation](https://docs.google.com/presentation/d/12I8W-uViPXuFu2IAk3yZpXTr5MxLYxCfhJValykyT0E/edit?usp=sharing)
 <!--#endregion:intro-->
@@ -39,11 +41,17 @@ highlighting needs more than just the `index` of the _match_, but also the offse
 capture groups. We also have no mechanism to indicate whether a capture group was merely _empty_ 
 vs. _unmatched_ (either optional or in an unchosen alternative of a disjunction).
 
-As such, we propose the adoption of an additional `offsets` property on the _match_ array. This
-property would itself be an array containing the offset from `index` for each captured substring.
-Any _unmatched_ capture groups would have an offset of `-1`. Also, the `offsets` array would itself
-have an additional `groups` property containing the offset from `index` for any named capture 
-groups.
+As such, we propose the addition of an optional second argument to `exec` that would take function
+callback that could be used to map the offsets of each capture to be used as the result in the 
+resulting _match_ array. This callback would be supplied with three arguments: The start position 
+of the match within the input (`-1` if unmatched), the end position of the match within the input
+(`-1` if unmatched), and the input string itself. The structure of the resulting _match_ array 
+itself does not change (it still would have own `index`, `input`, and (optional) `groups` 
+properties), but rather the value of each element would merely be the result as mapped through the 
+provided mapping function. 
+
+In addition, we propose a similar change to both `String.prototype.match` and 
+`String.prototype.matchAll`.
 <!--#endregion:motivations-->
 
 <!--#region:prior-art-->
@@ -70,16 +78,29 @@ groups.
 const re1 = /a*(?<Z>z)?/;
 
 // offsets are relative to start of the match:
-const m2 = re1.exec("xaaaz");
-m2.index === 1;
-m2.offsets[1] === 3;
-m2.offsets.groups["Z"] === 3;
+const s1 = "xaaaz";
+const m1 = re1.exec(s1, (start, end) => [start, end]);
+m1[0][0] === 1;
+m1[0][1] === 5;
+s1.slice(...m1[0]) === "aaaz";
+
+m1[1][0] === 4;
+m1[1][1] === 5;
+s1.slice(...m1[1]) === "z";
+
+m1.groups["Z"][0] === 4;
+m1.groups["Z"][1] === 5;
+s1.slice(...m1.groups["Z"]) === "z";
 
 // capture groups that are not matched (either optional or in the unmatched alternative of a
 // disjunction) have an offset of -1:
-const m3 = re1.exec("xaaay");
-m2.offsets[1] === -1;
-m2.offsets.groups["Z"] === -1;
+const m2 = re1.exec("xaaay", (start, end) => start === -1 ? null : [start, end]);
+m2[1] === null;
+m2.groups["Z"] === null;
+
+// the following two statements are functionally equivalent:
+re1.exec(text);
+re1.exec(text, (start, end, input) => input.slice(start, end));
 ```
 <!--#endregion:examples-->
 
@@ -88,14 +109,14 @@ m2.offsets.groups["Z"] === -1;
 # API
 
 ```ts
-interface RegExpExecArray extends Array<string> {
+interface RegExpExecArray<T = string> extends Array<T> {
   index: number;
   input: string;
-  groups: { [groupName: string]: string } | undefined;
-  offsets: RegExpOffsetsArray;
+  groups: { [groupName: string]: T } | undefined;
 }
-interface RegExpOffsetsArray extends Array<string> {
-  groups: { [groupName: string]: number } | undefined;
+
+interface RegExp {
+  exec<T = string>(text: string, mapfn?: (startIndex: number, endIndex: number, input: string) => T): RegExpExecArray<T>;
 }
 ``` 
 -->
