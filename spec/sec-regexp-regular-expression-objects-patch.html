@@ -383,21 +383,21 @@
     <h1>RegExp.prototype [ @@matchAll ] ( _string_ <ins>[, _options_]</ins>)</h1>
     <p>When the `@@matchAll` method is called with argument _string_ <ins> and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
-      1. Let _R_ be the *this* value.
-      1. If Type(_R_) is not Object, throw a *TypeError* exception.
-      1. Let _S_ be ? ToString(_string_).
-      1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
-      1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
-      1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
-      1. Let _matcher_ be ? Construct(_C_, « _R_, _flags_ »).
-      1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
-      1. Perform ? Set(_matcher_, `"lastIndex"`, _lastIndex_, *true*).
-      1. If _flags_ contains `"g"`, let _global_ be *true*.
-      1. Else, let _global_ be *false*.
-      1. If _flags_ contains `"u"`, let _fullUnicode_ be *true*.
-      1. Else, let _fullUnicode_ be *false*.
-      1. <del>Return ! CreateRegExpStringIterator(_matcher_, _S_, _global_, _fullUnicode_).</del>
-      1. <ins>Return ! CreateRegExpMatchIterator(_matcher_, _S_, _global_, _fullUnicode_, _matchOptions_).</ins>
+    1. Let _R_ be the *this* value.
+    1. If Type(_R_) is not Object, throw a *TypeError* exception.
+    1. Let _S_ be ? ToString(_string_).
+    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
+    1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
+    1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
+    1. Let _matcher_ be ? Construct(_C_, « _R_, _flags_ »).
+    1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
+    1. Perform ? Set(_matcher_, `"lastIndex"`, _lastIndex_, *true*).
+    1. If _flags_ contains `"g"`, let _global_ be *true*.
+    1. Else, let _global_ be *false*.
+    1. If _flags_ contains `"u"`, let _fullUnicode_ be *true*.
+    1. Else, let _fullUnicode_ be *false*.
+    1. <del>Return ! CreateRegExpStringIterator(_matcher_, _S_, _global_, _fullUnicode_).</del>
+    1. <ins>Return ! CreateRegExpMatchIterator(_matcher_, _S_, _global_, _fullUnicode_, _matchOptions_).</ins>
     </emu-alg>
     <p>The value of the *name* property of this function is *"[Symbol.matchAll]"*.</p>
 
@@ -405,18 +405,18 @@
       <h1><del>CreateRegExpStringIterator</del><ins>CreateRegExpMatchIterator</ins> ( _R_, _S_, _global_, _fullUnicode_<ins>, _matchOptions_</ins> )</h1>
       <p>The abstract operation <del>_CreateRegExpStringIterator_</del><ins>_CreateRegExpMatchIterator_</ins> is used to create such iterator objects. It performs the following steps:</p>
       <emu-alg>
-        1. Assert: Type(_S_) is String.
-        1. Assert: Type(_global_) is Boolean.
-        1. Assert: Type(_fullUnicode_) is Boolean.
-        1. <ins>Assert: _matchOptions_ is MatchOptions Record.</ins>
-        1. Let _iterator_ be ObjectCreate(<emu-xref href="#table-properties-of-regexp-match-iterator-instances">%RegExp<del>String</del><ins>Match</ins>IteratorPrototype%</emu-xref>, &laquo; [[IteratingRegExp]], [[IteratedString]], [[Global]], [[Unicode]]<ins>, [[MatchOptions]]</ins>, [[Done]] &raquo;).
-        1. Set _iterator_.[[IteratingRegExp]] to _R_.
-        1. Set _iterator_.[[IteratedString]] to _S_.
-        1. Set _iterator_.[[Global]] to _global_.
-        1. Set _iterator_.[[Unicode]] to _fullUnicode_.
-        1. <ins>Set _iterator_.[[MatchOptions]] to _matchOptions_.</ins>
-        1. Set _iterator_.[[Done]] to *false*.
-        1. Return _iterator_.
+      1. Assert: Type(_S_) is String.
+      1. Assert: Type(_global_) is Boolean.
+      1. Assert: Type(_fullUnicode_) is Boolean.
+      1. <ins>Assert: _matchOptions_ is MatchOptions Record.</ins>
+      1. Let _iterator_ be ObjectCreate(<emu-xref href="#table-properties-of-regexp-match-iterator-instances">%RegExp<del>String</del><ins>Match</ins>IteratorPrototype%</emu-xref>, &laquo; [[IteratingRegExp]], [[IteratedString]], [[Global]], [[Unicode]]<ins>, [[MatchOptions]]</ins>, [[Done]] &raquo;).
+      1. Set _iterator_.[[IteratingRegExp]] to _R_.
+      1. Set _iterator_.[[IteratedString]] to _S_.
+      1. Set _iterator_.[[Global]] to _global_.
+      1. Set _iterator_.[[Unicode]] to _fullUnicode_.
+      1. <ins>Set _iterator_.[[MatchOptions]] to _matchOptions_.</ins>
+      1. Set _iterator_.[[Done]] to *false*.
+      1. Return _iterator_.
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -441,33 +441,33 @@
     <emu-clause id="sec-%regexpmatchiteratorprototype%.next">
       <h1>%RegExp<del>String</del><ins>Match</ins>IteratorPrototype%.next ( )</h1>
       <emu-alg>
-        1. Let _O_ be the *this* value.
-        1. If Type(_O_) is not Object, throw a *TypeError* exception.
-        1. If _O_ does not have all of the internal slots of a RegExp <del>String</del><ins>Match</ins> Iterator Object Instance (see <emu-xref href="#sec-properties-of-regexp-match-iterator-instances"></emu-xref>), throw a *TypeError* exception.
-        1. If _O_.[[Done]] is *true*, then
-          1. Return ! CreateIterResultObject(*undefined*, *true*).
-        1. Let _R_ be _O_.[[IteratingRegExp]].
-        1. Let _S_ be _O_.[[IteratedString]].
-        1. Let _global_ be _O_.[[Global]].
-        1. Let _fullUnicode_ be _O_.[[Unicode]].
-        1. <ins>Let _matchOptions_ be _O_.[[MatchOptions]].</ins>
-        1. Let _match_ be ? RegExpExec(_R_, _S_<ins>, _matchOptions_</ins>).
-        1. If _match_ is *null*, then
-          1. Set _O_.[[Done]] to *true*.
-          1. Return ! CreateIterResultObject(*undefined*, *true*).
+      1. Let _O_ be the *this* value.
+      1. If Type(_O_) is not Object, throw a *TypeError* exception.
+      1. If _O_ does not have all of the internal slots of a RegExp <del>String</del><ins>Match</ins> Iterator Object Instance (see <emu-xref href="#sec-properties-of-regexp-match-iterator-instances"></emu-xref>), throw a *TypeError* exception.
+      1. If _O_.[[Done]] is *true*, then
+        1. Return ! CreateIterResultObject(*undefined*, *true*).
+      1. Let _R_ be _O_.[[IteratingRegExp]].
+      1. Let _S_ be _O_.[[IteratedString]].
+      1. Let _global_ be _O_.[[Global]].
+      1. Let _fullUnicode_ be _O_.[[Unicode]].
+      1. <ins>Let _matchOptions_ be _O_.[[MatchOptions]].</ins>
+      1. Let _match_ be ? RegExpExec(_R_, _S_<ins>, _matchOptions_</ins>).
+      1. If _match_ is *null*, then
+        1. Set _O_.[[Done]] to *true*.
+        1. Return ! CreateIterResultObject(*undefined*, *true*).
+      1. Else,
+        1. If _global_ is *true*,
+          1. <del>Let _matchStr_ be ? ToString(? Get(_match_, `"0"`)).</del>
+          1. <ins>Let _matchValue_ be ? CoerceMatchResult( ? Get(_match_, "0"), _matchOptions_).</ins>
+          1. <del>If _matchStr_ is the empty String, then</del>
+          1. <ins>If ? IsEmptyMatch(_match_, _matchOptions_) is *true*, then</ins>
+            1. Let _thisIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
+            1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
+            1. Perform ? Set(_R_, `"lastIndex"`, _nextIndex_, *true*).
+          1. Return ! CreateIterResultObject(_match_, *false*).
         1. Else,
-          1. If _global_ is *true*,
-            1. <del>Let _matchStr_ be ? ToString(? Get(_match_, `"0"`)).</del>
-            1. <ins>Let _matchValue_ be ? CoerceMatchResult( ? Get(_match_, "0"), _matchOptions_).</ins>
-            1. <del>If _matchStr_ is the empty String, then</del>
-            1. <ins>If ? IsEmptyMatch(_match_, _matchOptions_) is *true*, then</ins>
-              1. Let _thisIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
-              1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
-              1. Perform ? Set(_R_, `"lastIndex"`, _nextIndex_, *true*).
-            1. Return ! CreateIterResultObject(_match_, *false*).
-          1. Else,
-            1. Set _O_.[[Done]] to *true*.
-            1. Return ! CreateIterResultObject(_match_, *false*).
+          1. Set _O_.[[Done]] to *true*.
+          1. Return ! CreateIterResultObject(_match_, *false*).
       </emu-alg>
     </emu-clause>
   </emu-clause>
