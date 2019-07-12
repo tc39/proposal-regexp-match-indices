@@ -134,10 +134,11 @@
   <emu-clause id="sec-frommatchoptions" aoid="FromMatchOptions">
     <h1><ins>FromMatchOptions ( _Options_ )</ins></h1>
     <p>
-      When the abstract operation FromMatchOptions is called with MatchOptions _Options_, the following steps are taken:
+      When the abstract operation FromMatchOptions is called with argument _Options_, the following steps are taken:
     </p>
     <emu-alg>
     1. If _Options_ is *undefined*, return *undefined*.
+    1. Assert: _Options_ is a MatchOptions Record.
     1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
     1. Assert: _obj_ is an extensible ordinary object with no own properties.
     1. If _Options_ has a [[Capture]] field, then
@@ -148,16 +149,16 @@
   </emu-clause>
 
   <emu-clause id="sec-tomatchoptions" aoid="ToMatchOptions">
-    <h1><ins>ToMatchOptions ( _Obj_ )</ins></h1>
+    <h1><ins>ToMatchOptions ( _Options_ )</ins></h1>
     <p>
-      When the abstract operation ToMatchOptions is called with Object _Obj_, the following steps are taken:
+      When the abstract operation ToMatchOptions is called with argument _Options_, the following steps are taken:
     </p>
     <emu-alg>
-    1. If _Obj_ is *undefined*, then
-      1. Let _optionsObj_ be ObjectCreate(*null*).
+    1. If _Options_ is *undefined* or *null*, then
+      1. Let _optionsObj_ be *undefined*.
     1. Else,
-      1. Let _optionsObj_ be ? ToObject(_options_).
-    1. Let _capture_ be ? GetOption(_options_, `"capture"`, `"string"`, &laquo; `"strings"`, `"indices"` &raquo;, `"strings"`).
+      1. Let _optionsObj_ be ? ToObject(_Options_).
+    1. Let _capture_ be ? GetOptionValue(_optionsObj_, `"capture"`, `"string"`, `"strings"`, &laquo; `"strings"`, `"indices"` &raquo;).
     1. Return a new MatchOptions { [[Capture]]: _capture_ }.
     </emu-alg>
   </emu-clause>
@@ -175,6 +176,7 @@
     1. Let _R_ be the *this* value.
     1. If Type(_R_) is not Object, throw a *TypeError* exception.
     1. If _R_ does not have a [[RegExpMatcher]] internal slot, throw a *TypeError* exception.
+    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _S_ be ? ToString(_string_).
     1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _matchOptions_</ins>).
@@ -182,10 +184,11 @@
 
     <emu-clause id="sec-regexpexec" aoid="RegExpExec">
       <h1>Runtime Semantics: RegExpExec ( _R_, _S_<ins>, _matchOptions_</ins> )</h1>
-      <p>The abstract operation RegExpExec with arguments <del>_R_ and _S_</del><ins>_R_, _S_, and MatchOptions _matchOptions_</ins> performs the following steps:</p>
+      <p>The abstract operation RegExpExec with arguments _R_<del> and</del><ins>,</ins> _S_<ins> and _matchOptions_</ins> performs the following steps:</p>
       <emu-alg>
       1. Assert: Type(_R_) is Object.
       1. Assert: Type(_S_) is String.
+      1. <ins>Assert: _matchOptions_ is a MatchOptions Record.</ins>
       1. Let _exec_ be ? Get(_R_, `"exec"`).
       1. If IsCallable(_exec_) is *true*, then
         1. Let _result_ be ? Call(_exec_, _R_, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
@@ -201,10 +204,11 @@
 
     <emu-clause id="sec-regexpbuiltinexec" aoid="RegExpBuiltinExec">
       <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ <ins>, _matchOptions_</ins> )</h1>
-      <p>The abstract operation RegExpBuiltinExec with arguments _R_<del> and</del><ins>,</ins> _S_ <ins>and MatchOptions _matchOptions_</ins> performs the following steps:</p>
+      <p>The abstract operation RegExpBuiltinExec with arguments _R_<del> and</del><ins>,</ins> _S_ <ins>and _matchOptions_</ins> performs the following steps:</p>
       <emu-alg>
       1. Assert: _R_ is an initialized RegExp instance.
       1. Assert: Type(_S_) is String.
+      1. <ins>Assert: _matchOptions_ is a MatchOptions Record.</ins>
       1. Let _length_ be the number of code units in _S_.
       1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
       1. Let _flags_ be _R_.[[OriginalFlags]].
@@ -287,9 +291,10 @@
 
     <emu-clause id="sec-getmatchresult" aoid="GetMatchResult">
       <h1><ins>GetMatchResult ( _Input_, _startIndex_, _endIndex_, _fullUnicode_ _matchOptions_ )</ins></h1>
-      <p>The abstract operation GetMatchResult with arguments _Input_, _startIndex_, _endIndex_, _fullUnicode_, and MatchOptions _matchOptions_ performs the following steps:</p>
+      <p>The abstract operation GetMatchResult with arguments _Input_, _startIndex_, _endIndex_, _fullUnicode_, and _matchOptions_ performs the following steps:</p>
       <emu-alg>
       1. Assert: _Input_ is a List of either Unicode code points or code units.
+      1. Assert: _matchOptions_ is a MatchOptions Record.
       1. If _matchOptions_.[[Captures]] is `"indices"`, then
         1. Return CreateArrayFromList(&laquo; _startIndex_, _endIndex_ &raquo;).
       1. Else,
@@ -305,8 +310,9 @@
 
     <emu-clause id="sec-getmatchresult" aoid="GetMatchResult">
       <h1><ins>CoerceMatchResult ( _match_, _matchOptions_ )</ins></h1>
-      <p>The abstract operation CoerceMatchResult with arguments _match_ and MatchOptions _matchOptions_ performs the following steps:</p>
+      <p>The abstract operation CoerceMatchResult with arguments _match_ and _matchOptions_ performs the following steps:</p>
       <emu-alg>
+      1. Assert: _matchOptions_ is a MatchOptions Record.
       1. If _matchOptions_.[[Captures]] is `"indices"`, then
         1. Set _match_ to be ? ToObject(_match_).
         1. Let _startIndex_ be ? Get(_match_, `"0"`).
@@ -321,8 +327,9 @@
 
     <emu-clause id="sec-isemptymatch" aoid="IsEmptyMatch">
       <h1><ins>IsEmptyMatch ( _match_, _matchOptions_ )</ins></h1>
-      <p>The abstract operation IsEmptyMatch with arguments _match and MatchOptions _matchOptions_ performs the following steps:</p>
+      <p>The abstract operation IsEmptyMatch with arguments _match and _matchOptions_ performs the following steps:</p>
       <emu-alg>
+      1. Assert: _matchOptions_ is a MatchOptions Record.
       1. If _matchOptions_.[[Captures]] is `"indices"`, then
         1. Set _match_ to be ? ToObject(_match_).
         1. Let _startIndex_ be ? Get(_match_, `"0"`).
@@ -345,6 +352,7 @@
     <emu-alg>
     1. Let _rx_ be the *this* value.
     1. If Type(_rx_) is not Object, throw a *TypeError* exception.
+    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _S_ be ? ToString(_string_).
     1. Let _global_ be ToBoolean(? Get(_rx_, `"global"`)).
@@ -386,6 +394,7 @@
     1. Let _R_ be the *this* value.
     1. If Type(_R_) is not Object, throw a *TypeError* exception.
     1. Let _S_ be ? ToString(_string_).
+    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
     1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
