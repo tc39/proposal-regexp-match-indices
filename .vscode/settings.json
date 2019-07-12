@@ -2,8 +2,8 @@
     "[markdown]": {
         "files.trimTrailingWhitespace": false
     },
-    // "files.associations": {
-    //     "*.html": "ecmarkup",
-    //     "*.emu": "ecmarkup"
-    // }
+    "files.associations": {
+        "*.html": "ecmarkup",
+        "*.emu": "ecmarkup"
+    }
 }

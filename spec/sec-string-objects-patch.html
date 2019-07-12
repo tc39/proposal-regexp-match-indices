@@ -5,15 +5,14 @@
     <p>When the `match` method is called with argument _regexp_ <ins>and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
     1. Let _O_ be ? RequireObjectCoercible(*this* value).
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
-    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
+    1. <ins>Let _matchOptions_ be ! FromMatchOptions(? ToMatchOptions(_options_)).</ins>
     1. If _regexp_ is neither *undefined* nor *null*, then
       1. Let _matcher_ be ? GetMethod(_regexp_, @@match).
       1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _matchOptions_</ins> &raquo;).
     1. Let _S_ be ? ToString(_O_).
     1. Let _rx_ be ? RegExpCreate(_regexp_, *undefined*).
-    1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+    1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, _matchOptions_</ins> &raquo;).
     </emu-alg>
     <emu-note>
     <p>The `match` function is intentionally generic; it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</p>
@@ -25,15 +24,14 @@
     <p>When the `matchAll` method is called, the following steps are taken:</p>
     <emu-alg>
     1. Let _O_ be ? RequireObjectCoercible(*this* value).
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
-    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
+    1. <ins>Let _matchOptions_ be ! FromMatchOptions(? ToMatchOptions(_options_)).</ins>
     1. If _regexp_ is neither *undefined* nor *null*, then
       1. Let _matcher_ be ? GetMethod(_regexp_, @@matchAll).
       1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _matchOptions_</ins> &raquo;).
     1. Let _S_ be ? ToString(_O_).
     1. Let _rx_ be ? RegExpCreate(_regexp_, `"g"`).
-    1. Return ? Invoke(_rx_, @@matchAll, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+    1. Return ? Invoke(_rx_, @@matchAll, &laquo; _S_<ins>, _matchOptions_</ins> &raquo;).
     </emu-alg>
     <emu-note>The `matchAll` function is intentionally generic, it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</emu-note>
     <emu-note>Similarly to `String.prototype.split`, `String.prototype.matchAll` is designed to typically act without mutating its inputs.</emu-note>
@@ -43,7 +41,6 @@
     <p>When the `replace` method is called with arguments _searchValue_ and _replaceValue_ <ins>and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
     1. Let _O_ be ? RequireObjectCoercible(*this* value).
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. If _searchValue_ is neither *undefined* nor *null*, then
       1. Let _replacer_ be ? GetMethod(_searchValue_, @@replace).

@@ -137,12 +137,10 @@
       When the abstract operation FromMatchOptions is called with argument _Options_, the following steps are taken:
     </p>
     <emu-alg>
-    1. If _Options_ is *undefined*, return *undefined*.
     1. Assert: _Options_ is a MatchOptions Record.
     1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
     1. Assert: _obj_ is an extensible ordinary object with no own properties.
-    1. If _Options_ has a [[Capture]] field, then
-      1. Perform CreateDataProperty(_obj_, `"capture"`, _Options_.[[Capture]]).
+    1. Perform CreateDataProperty(_obj_, `"capture"`, _Options_.[[Capture]]).
     1. Assert: All of the above CreateDataProperty operations return *true*.
     1. Return _obj_.
     </emu-alg>
@@ -158,7 +156,7 @@
       1. Let _optionsObj_ be *undefined*.
     1. Else,
       1. Let _optionsObj_ be ? ToObject(_Options_).
-    1. Let _capture_ be ? GetOptionValue(_optionsObj_, `"capture"`, `"string"`, `"strings"`, &laquo; `"strings"`, `"indices"` &raquo;).
+    1. Let _capture_ be ? GetOption(_optionsObj_, `"capture"`, String, `"strings"`, &laquo; `"strings"`, `"indices"` &raquo;).
     1. Return a new MatchOptions { [[Capture]]: _capture_ }.
     </emu-alg>
   </emu-clause>
@@ -176,7 +174,6 @@
     1. Let _R_ be the *this* value.
     1. If Type(_R_) is not Object, throw a *TypeError* exception.
     1. If _R_ does not have a [[RegExpMatcher]] internal slot, throw a *TypeError* exception.
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _S_ be ? ToString(_string_).
     1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _matchOptions_</ins>).
@@ -352,7 +349,6 @@
     <emu-alg>
     1. Let _rx_ be the *this* value.
     1. If Type(_rx_) is not Object, throw a *TypeError* exception.
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _S_ be ? ToString(_string_).
     1. Let _global_ be ToBoolean(? Get(_rx_, `"global"`)).
@@ -394,11 +390,10 @@
     1. Let _R_ be the *this* value.
     1. If Type(_R_) is not Object, throw a *TypeError* exception.
     1. Let _S_ be ? ToString(_string_).
-    1. <ins>If _options_ is not present, let _options be *undefined*.</ins>
     1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
     1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
     1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
-    1. Let _matcher_ be ? Construct(_C_, « _R_, _flags_ »).
+    1. Let _matcher_ be ? Construct(_C_, &laquo; _R_, _flags_ &raquo;).
     1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
     1. Perform ? Set(_matcher_, `"lastIndex"`, _lastIndex_, *true*).
     1. If _flags_ contains `"g"`, let _global_ be *true*.
@@ -474,7 +469,7 @@
   <emu-clause id="sec-properties-of-regexp-string-iterator-instances">
     <h1>Properties of RegExp String Iterator Instances</h1>
     <p>RegExp String Iterator instances are ordinary objects that inherit properties from the <emu-xref href="#sec-%regexpstringiteratorprototype%-object">%RegExpStringIteratorPrototype%</emu-xref> intrinsic object. RegExp String Iterator instances are initially created with the internal slots listed in <emu-xref href="#table-properties-of-regexp-string-iterator-instances">Table 2</emu-xref>.</p>
-    <emu-table id="table-properties-of-regexp-string-iterator-instances" caption="Internal Slots of RegExp &lt;del&gt;String&lt;/del&gt;&lt;ins&gt;Match&lt;/ins&gt; Iterator Instances">
+    <emu-table id="table-properties-of-regexp-string-iterator-instances" caption="Internal Slots of RegExp String Iterator Instances">
       <table>
         <tbody>
           <tr>
@@ -509,5 +504,5 @@
         </tbody>
       </table>
     </emu-table>
-  </emu-clause>    
+  </emu-clause>
 </emu-clause>
