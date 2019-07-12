@@ -1,38 +1,71 @@
 <emu-clause id="sec-properties-of-the-string-prototype-object">
   <h1>Properties of the String Prototype Object</h1>
   <emu-clause id="sec-string.prototype.match">
-    <h1>String.prototype.match ( _regexp_ <ins>[, _mapfn_ ]</ins> )</h1>
-    <p>When the `match` method is called with argument _regexp_ <ins>and optional argument _mapfn_</ins>, the following steps are taken:</p>
+    <h1>String.prototype.match ( _regexp_ <ins>[, _options_ ]</ins> )</h1>
+    <p>When the `match` method is called with argument _regexp_ <ins>and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
       1. Let _O_ be ? RequireObjectCoercible(*this* value).
-      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+      1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
       1. If _regexp_ is neither *undefined* nor *null*, then
         1. Let _matcher_ be ? GetMethod(_regexp_, @@match).
         1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
+          1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
       1. Let _S_ be ? ToString(_O_).
       1. Let _rx_ be ? RegExpCreate(_regexp_, *undefined*).
-      1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, _mapfn_</ins> &raquo;).
+      1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
     </emu-alg>
     <emu-note>
     <p>The `match` function is intentionally generic; it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</p>
     </emu-note>
   </emu-clause>
   <emu-clause id="sec-string.prototype.matchall">
-    <h1>String.prototype.matchAll ( _regexp_ [, _mapfn_ ] )</h1>
-    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
+    <h1>String.prototype.matchAll ( _regexp_ [, _options_ ] )</h1>
     <p>Performs a regular expression match of the String representing the *this* value against _regexp_ and returns an iterator. Each iteration result’s value is an Array object containing the results of the match, or *null* if the String did not match.</p>
     <p>When the `matchAll` method is called, the following steps are taken:</p>
     <emu-alg>
       1. Let _O_ be ? RequireObjectCoercible(*this* value).
-      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+      1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
       1. If _regexp_ is neither *undefined* nor *null*, then
         1. Let _matcher_ be ? GetMethod(_regexp_, @@matchAll).
         1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
-      1. Return ? MatchAllIterator(_regexp_, _O_<ins>, _mapfn_</ins>).
+          1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+      1. Let _S_ be ? ToString(_O_).
+      1. Let _rx_ be ? RegExpCreate(_regexp_, `"g"`).
+      1. Return ? Invoke(_rx_, @@matchAll, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
     </emu-alg>
     <emu-note>The `matchAll` function is intentionally generic, it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</emu-note>
     <emu-note>Similarly to `String.prototype.split`, `String.prototype.matchAll` is designed to typically act without mutating its inputs.</emu-note>
   </emu-clause>
+  <emu-clause id="sec-string.prototype.replace">
+    <h1>String.prototype.replace ( _searchValue_, _replaceValue_<ins>[, _options_ ]</ins> )</h1>
+    <p>When the `replace` method is called with arguments _searchValue_ and _replaceValue_ <ins>and optional argument _options_</ins>, the following steps are taken:</p>
+    <emu-alg>
+      1. Let _O_ be ? RequireObjectCoercible(*this* value).
+      1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
+      1. If _searchValue_ is neither *undefined* nor *null*, then
+        1. Let _replacer_ be ? GetMethod(_searchValue_, @@replace).
+        1. If _replacer_ is not *undefined*, then
+          1. Return ? Call(_replacer_, _searchValue_, &laquo; _O_, _replaceValue_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
+      1. <ins>If _matchOptions_.[[Captures]] is not `"strings"`, throw a *RangeError* exception.</ins>
+      1. Let _string_ be ? ToString(_O_).
+      1. Let _searchString_ be ? ToString(_searchValue_).
+      1. Let _functionalReplace_ be IsCallable(_replaceValue_).
+      1. If _functionalReplace_ is *false*, then
+        1. Set _replaceValue_ to ? ToString(_replaceValue_).
+      1. Search _string_ for the first occurrence of _searchString_ and let _pos_ be the index within _string_ of the first code unit of the matched substring and let _matched_ be _searchString_. If no occurrences of _searchString_ were found, return _string_.
+      1. If _functionalReplace_ is *true*, then
+        1. Let _replValue_ be ? Call(_replaceValue_, *undefined*, &laquo; _matched_, _pos_, _string_ &raquo;).
+        1. Let _replStr_ be ? ToString(_replValue_).
+      1. Else,
+        1. Let _captures_ be a new empty List.
+        1. Let _replStr_ be GetSubstitution(_matched_, _string_, _pos_, _captures_, *undefined*, _replaceValue_).
+      1. Let _tailPos_ be _pos_ + the number of code units in _matched_.
+      1. Let _newString_ be the string-concatenation of the first _pos_ code units of _string_, _replStr_, and the trailing substring of _string_ starting at index _tailPos_. If _pos_ is 0, the first element of the concatenation will be the empty String.
+      1. Return _newString_.
+    </emu-alg>
+    <emu-note>
+    <p>The `match` function is intentionally generic; it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</p>
+    </emu-note>
+  </emu-clause>
+
 </emu-clause>
