@@ -4,15 +4,15 @@
     <h1>String.prototype.match ( _regexp_ <ins>[, _mapfn_ ]</ins> )</h1>
     <p>When the `match` method is called with argument _regexp_ <ins>and optional argument _mapfn_</ins>, the following steps are taken:</p>
     <emu-alg>
-      1. Let _O_ be ? RequireObjectCoercible(*this* value).
-      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
-      1. If _regexp_ is neither *undefined* nor *null*, then
-        1. Let _matcher_ be ? GetMethod(_regexp_, @@match).
-        1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
-      1. Let _S_ be ? ToString(_O_).
-      1. Let _rx_ be ? RegExpCreate(_regexp_, *undefined*).
-      1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, _mapfn_</ins> &raquo;).
+    1. Let _O_ be ? RequireObjectCoercible(*this* value).
+    1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+    1. If _regexp_ is neither *undefined* nor *null*, then
+      1. Let _matcher_ be ? GetMethod(_regexp_, @@match).
+      1. If _matcher_ is not *undefined*, then
+      1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
+    1. Let _S_ be ? ToString(_O_).
+    1. Let _rx_ be ? RegExpCreate(_regexp_, *undefined*).
+    1. Return ? Invoke(_rx_, @@match, &laquo; _S_<ins>, _mapfn_</ins> &raquo;).
     </emu-alg>
     <emu-note>
     <p>The `match` function is intentionally generic; it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</p>
@@ -20,17 +20,18 @@
   </emu-clause>
   <emu-clause id="sec-string.prototype.matchall">
     <h1>String.prototype.matchAll ( _regexp_ [, _mapfn_ ] )</h1>
-    <emu-note>This is part of the <a href="https://github.com/tc39/proposal-string-matchall">String.prototype.matchAll</a> proposal.</emu-note>
     <p>Performs a regular expression match of the String representing the *this* value against _regexp_ and returns an iterator. Each iteration result’s value is an Array object containing the results of the match, or *null* if the String did not match.</p>
     <p>When the `matchAll` method is called, the following steps are taken:</p>
     <emu-alg>
-      1. Let _O_ be ? RequireObjectCoercible(*this* value).
-      1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
-      1. If _regexp_ is neither *undefined* nor *null*, then
-        1. Let _matcher_ be ? GetMethod(_regexp_, @@matchAll).
-        1. If _matcher_ is not *undefined*, then
-        1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
-      1. Return ? MatchAllIterator(_regexp_, _O_<ins>, _mapfn_</ins>).
+    1. Let _O_ be ? RequireObjectCoercible(*this* value).
+    1. <ins>If _mapfn_ is not *undefined* and IsCallable(_mapfn_) is *false*, throw a *TypeError* exception.</ins>
+    1. If _regexp_ is neither *undefined* nor *null*, then
+      1. Let _matcher_ be ? GetMethod(_regexp_, @@matchAll).
+      1. If _matcher_ is not *undefined*, then
+      1. Return ? Call(_matcher_, _regexp_, &laquo; _O_<ins>, _mapfn_</ins> &raquo;).
+    1. Let _S_ be ? ToString(_O_).
+    1. Let _rx_ be ? RegExpCreate(_regexp_, `"g"`).
+    1. Return ? Invoke(_rx_, @@matchAll, &laquo; _S_<ins>, _mapfn_</ins> &raquo;).
     </emu-alg>
     <emu-note>The `matchAll` function is intentionally generic, it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</emu-note>
     <emu-note>Similarly to `String.prototype.split`, `String.prototype.matchAll` is designed to typically act without mutating its inputs.</emu-note>
