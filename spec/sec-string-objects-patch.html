@@ -46,7 +46,7 @@
       1. Let _replacer_ be ? GetMethod(_searchValue_, @@replace).
       1. If _replacer_ is not *undefined*, then
         1. Return ? Call(_replacer_, _searchValue_, &laquo; _O_, _replaceValue_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
-    1. <ins>If _matchOptions_.[[Captures]] is not `"strings"`, throw a *RangeError* exception.</ins>
+    1. <ins>If _matchOptions_.[[Capture]] is not `"strings"`, throw a *RangeError* exception.</ins>
     1. Let _string_ be ? ToString(_O_).
     1. Let _searchString_ be ? ToString(_searchValue_).
     1. Let _functionalReplace_ be IsCallable(_replaceValue_).

@@ -122,7 +122,7 @@
             <th>Meaning</th>
           </tr>
           <tr>
-            <td>[[Captures]]</td>
+            <td>[[Capture]]</td>
             <td>`"strings"` or `"indices"`</td>
             <td>Whether the operation should capture substrings or the start/end indices of the capture.</td>
           </tr>
@@ -292,7 +292,7 @@
       <emu-alg>
       1. Assert: _Input_ is a List of either Unicode code points or code units.
       1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Captures]] is `"indices"`, then
+      1. If _matchOptions_.[[Capture]] is `"indices"`, then
         1. Return CreateArrayFromList(&laquo; _startIndex_, _endIndex_ &raquo;).
       1. Else,
         1. Let _matchChars_ be a new List whose elements are the characters of _Input_ at indices _startIndex_ (inclusive) through _endIndex_ (exclusive).
@@ -310,7 +310,7 @@
       <p>The abstract operation CoerceMatchResult with arguments _match_ and _matchOptions_ performs the following steps:</p>
       <emu-alg>
       1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Captures]] is `"indices"`, then
+      1. If _matchOptions_.[[Capture]] is `"indices"`, then
         1. Set _match_ to be ? ToObject(_match_).
         1. Let _startIndex_ be ? Get(_match_, `"0"`).
         1. Let _endIndex_ be ? Get(_match_, `"1"`).
@@ -327,7 +327,7 @@
       <p>The abstract operation IsEmptyMatch with arguments _match and _matchOptions_ performs the following steps:</p>
       <emu-alg>
       1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Captures]] is `"indices"`, then
+      1. If _matchOptions_.[[Capture]] is `"indices"`, then
         1. Set _match_ to be ? ToObject(_match_).
         1. Let _startIndex_ be ? Get(_match_, `"0"`).
         1. Let _endIndex_ be ? Get(_match_, `"1"`).
