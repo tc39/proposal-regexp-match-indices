@@ -195,8 +195,8 @@ The following is a high-level list of tasks to progress through each stage of th
 
 <!-- The following links should be supplied as the proposal advances: -->
 [Transpiler]: #todo
-[Stage3ReviewerSignOff]: #todo
-[Stage3EditorSignOff]: #todo
+[Stage3ReviewerSignOff]: https://github.com/tc39/proposal-regexp-match-offsets/issues/11
+[Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-offsets/issues/11
 [Test262PullRequest]: #todo
 [Implementation1]: #todo
 [Implementation2]: #todo
