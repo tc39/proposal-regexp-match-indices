@@ -33,10 +33,10 @@
         A <em>CharSet</em> is a mathematical set of characters, either code units or code points depending up the state of the _Unicode_ flag. &ldquo;All characters&rdquo; means either all code unit values or all code point values also depending upon the state of _Unicode_.
       </li>
       <li>
-        <ins>A <em>Range</em> is an ordered pair (_startIndex_, _endIndex_) represents the range of characters included in a capture, where _startIndex_ is an integer representing the start index (inclusive) and _endIndex_ is an integer representing the end index (exclusive)</ins>
+        <ins>A <em>Range</em> is an ordered pair (_startIndex_, _endIndex_) represents the range of characters included in a capture, where _startIndex_ is an integer representing the start index (inclusive) of the range within _Input_ and _endIndex_ is an integer representing the end index (exclusive) of the range within _Input_. For any <em>Range</em>, these indices must satisfy the invariant that _startIndex_ ≤ _endIndex_.</ins>
       </li>
       <li>
-        A <em>State</em> is an ordered pair (_endIndex_, _captures_) where _endIndex_ is an integer and _captures_ is a List of _NcapturingParens_ values. States are used to represent partial match states in the regular expression matching algorithms. The _endIndex_ is one plus the index of the last input character matched so far by the pattern, while _captures_ holds the results of capturing parentheses. The _n_<sup>th</sup> element of _captures_ is either a List that represents the <del>value</del><ins><em>Range</em></ins> obtained by the _n_<sup>th</sup> set of capturing parentheses or *undefined* if the _n_<sup>th</sup> set of capturing parentheses hasn't been reached yet. Due to backtracking, many States may be in use at any time during the matching process.
+        A <em>State</em> is an ordered pair (_endIndex_, _captures_) where _endIndex_ is an integer representing an index within _Input_ and _captures_ is a List of _NcapturingParens_ values. States are used to represent partial match states in the regular expression matching algorithms. The _endIndex_ is one plus the index of the last input character matched so far by the pattern, while _captures_ holds the results of capturing parentheses. The _n_<sup>th</sup> element of _captures_ is either a List that represents the <del>value</del><ins><em>Range</em></ins> obtained by the _n_<sup>th</sup> set of capturing parentheses or *undefined* if the _n_<sup>th</sup> set of capturing parentheses hasn't been reached yet. Due to backtracking, many States may be in use at any time during the matching process.
       </li>
       <li>
         A <em>MatchResult</em> is either a State or the special token ~failure~ that indicates that the match failed.
@@ -110,7 +110,7 @@
   <emu-clause id="sec-matchoptions-records">
     <h1><ins>MatchOptions Records</ins></h1>
     <ins>
-    <p>A MatchOptions is a Record value used to encapsulate options for a regular expression matching operation.</p>
+    <p>A <dfn>MatchOptions</dfn> is a Record value used to encapsulate options for a regular expression matching operation.</p>
     <p>MatchOptions Records have the fields listed in <emu-xref href="#table-matchoptions-record"></emu-xref>.</p>
     </ins>
     <emu-table id="table-matchoptions-record" caption="MatchOptions Record Fields">
@@ -167,7 +167,7 @@
   <h1>Properties of the RegExp Prototype Object</h1>
 
   <emu-clause id="sec-regexp.prototype.exec">
-    <h1>RegExp.prototype.exec ( _string_ <ins>[, _options_ ]</ins> )</h1>
+    <h1>RegExp.prototype.exec ( _string_ <ins>[ , _options_ ]</ins> )</h1>
     <p>Performs a regular expression match of _string_ against the regular expression and returns an Array object containing the results of the match, or *null* if _string_ did not match.</p>
     <p>The String ToString(_string_) is searched for an occurrence of the regular expression pattern as follows:</p>
     <emu-alg>
@@ -232,7 +232,7 @@
           1. Set _matchSucceeded_ to *true*.
       1. Let _e_ be _r_'s _endIndex_ value.
       1. <del>If _fullUnicode_ is *true*, then</del>
-        1. <del>_e_ is an index into the _Input_ character list. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.</del>
+        1. <del>_e_ is an index into the _Input_ character list, derived from _S_, matched by _matcher_. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.</del>
         1. <del>Set _e_ to _eUTF_.</del>
       1. <ins>If _fullUnicode_ is *true*, set _e_ to ! GetStringIndex(_S_, _Input_, _e_).</ins>
       1. If _global_ is *true* or _sticky_ is *true*, then
@@ -244,7 +244,7 @@
       1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
       1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
       1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-      1. <ins>If _matchedValue_ be GetMatchResult(_S_, _lastIndex_, _e_, _fullUnicode_, _matchOptions_).</ins>
+      1. <ins>Let _matchedValue_ be ! GetMatchResult(_S_, _lastIndex_, _e_, _matchOptions_)</ins>
       1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
       1. If _R_ contains any |GroupName|, then
         1. Let _groups_ be ObjectCreate(*null*).
@@ -266,7 +266,7 @@
           1. <ins>If _fullUnicode_ is *true*, then</ins>
             1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
             1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
-          1. <ins>Let _capturedValue_ be GetMatchResult(_Input_, _captureStart_, _captureEnd_, _fullUnicode_, _matchOptions_).</ins>
+          1. <ins>Let _capturedValue_ be ! GetMatchResult(_S_, _captureStart_, _captureEnd_, _matchOptions_).</ins>
         1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
         1. If the _i_th capture of _R_ was defined with a |GroupName|, then
           1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
@@ -280,71 +280,51 @@
       <p>The abstract operation GetStringIndex with with arguments _S_, _Input_, and _e_ performs the following steps:</p>
       <emu-alg>
       1. Assert: Type(_S_) is String.
-      1. Assert: _Input_ is a List of Unicode code points.
-      1. _e_ is an index into the _Input_ character list, derived from _S_. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.
+      1. Assert: _Input_ is a List of the code points of _S_ interpreted as a UTF-16 encoded string.
+      1. Assert: _e_ is an integer index within _Input_.
+      1. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.
       1. Return _eUTF_.
       </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-getmatchresult" aoid="GetMatchResult">
-      <h1><ins>GetMatchResult ( _Input_, _startIndex_, _endIndex_, _fullUnicode_ _matchOptions_ )</ins></h1>
-      <p>The abstract operation GetMatchResult with arguments _Input_, _startIndex_, _endIndex_, _fullUnicode_, and _matchOptions_ performs the following steps:</p>
+      <h1><ins>GetMatchResult ( _S_, _startIndex_, _endIndex_, _matchOptions_ )</ins></h1>
+      <p>The abstract operation GetMatchResult with arguments _S_, _startIndex_, _endIndex_, and _matchOptions_ performs the following steps:</p>
       <emu-alg>
-      1. Assert: _Input_ is a List of either Unicode code points or code units.
+      1. Assert: Type(_S_) is String.
+      1. Assert: _startIndex_ is an integer index into _S_.
+      1. Assert: _endIndex_ is an integer index into _S_ that is greater than or equal to _startIndex_.
       1. Assert: _matchOptions_ is a MatchOptions Record.
       1. If _matchOptions_.[[Capture]] is `"indices"`, then
         1. Return CreateArrayFromList(&laquo; _startIndex_, _endIndex_ &raquo;).
       1. Else,
-        1. Let _matchChars_ be a new List whose elements are the characters of _Input_ at indices _startIndex_ (inclusive) through _endIndex_ (exclusive).
-        1. If _fullUnicode_ is *true*, then
-          1. Assert: _matchChars_ is a List of code points.
-          1. Return the String value whose code units are the UTF16Encoding of the code points of _matchChars_.
-        1. Else _fullUnicode_ is *false*,
-          1. Assert: _matchChars_ is a List of code units.
-          1. Return the String value consisting of the code units of _matchChars_.
+        1. Return the portion of _S_ between offset _startIndex_ inclusive and offset _endIndex_ exclusive.
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-getmatchresult" aoid="GetMatchResult">
+    <emu-clause id="sec-coercematchresult" aoid="CoerceMatchResult">
       <h1><ins>CoerceMatchResult ( _match_, _matchOptions_ )</ins></h1>
       <p>The abstract operation CoerceMatchResult with arguments _match_ and _matchOptions_ performs the following steps:</p>
       <emu-alg>
       1. Assert: _matchOptions_ is a MatchOptions Record.
       1. If _matchOptions_.[[Capture]] is `"indices"`, then
-        1. Set _match_ to be ? ToObject(_match_).
-        1. Let _startIndex_ be ? Get(_match_, `"0"`).
-        1. Let _endIndex_ be ? Get(_match_, `"1"`).
-        1. If Type(_startIndex_) is not Number, throw a *TypeError* exception.
-        1. If Type(_endIndex_) is not Number, throw a *TypeError* exception.
-        1. Return CreateArrayFromList(&laquo; _startIndex_, _endIndex_ &raquo;).
+        1. If Type(_match_) is not Object, throw a *TypeError* exception.
+        1. Let _start_ be ? Get(_match_, `"0"`).
+        1. Let _end_ be ? Get(_match_, `"1"`).
+        1. If Type(_start_) is not Number, throw a *TypeError* exception.
+        1. If Type(_end_) is not Number, throw a *TypeError* exception.
+        1. Let _matchValue_ be _match_.
+        1. Let _isEmpty_ be _start_ = _end_.
       1. Else,
-        1. Return ? ToString(_match_).
+        1. Let _matchValue_ be ? ToString(_match_).
+        1. If _matchValue_ is the empty String, let _isEmpty_ be *true*.
+        1. Else, let _isEmpty_ be *false*.
+      1. Return a new Record { [[Value]]: _matchValue_, [[IsEmpty]]: _isEmpty_ }.
       </emu-alg>
     </emu-clause>
-
-    <emu-clause id="sec-isemptymatch" aoid="IsEmptyMatch">
-      <h1><ins>IsEmptyMatch ( _match_, _matchOptions_ )</ins></h1>
-      <p>The abstract operation IsEmptyMatch with arguments _match and _matchOptions_ performs the following steps:</p>
-      <emu-alg>
-      1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Capture]] is `"indices"`, then
-        1. Set _match_ to be ? ToObject(_match_).
-        1. Let _startIndex_ be ? Get(_match_, `"0"`).
-        1. Let _endIndex_ be ? Get(_match_, `"1"`).
-        1. If Type(_startIndex_) is not Number, throw a *TypeError* exception.
-        1. If Type(_endIndex_) is not Number, throw a *TypeError* exception.
-        1. Return _endIndex_-_startIndex_=0.
-      1. Else,
-        1. Let _matchStr_ be ? ToString(_match_).
-        1. If _matchStr_ is the empty String, then
-          1. Return True.
-        1. Return False.
-      </emu-alg>
-    </emu-clause>
-  </emu-clause>
 
   <emu-clause id="sec-regexp.prototype-@@match">
-    <h1>RegExp.prototype [ @@match ] ( _string_ <ins>[, _options_ ]</ins> )</h1>
+    <h1>RegExp.prototype [ @@match ] ( _string_ <ins>[ , _options_ ]</ins> )</h1>
     <p>When the `@@match` method is called with argument _string_ <ins> and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
     1. Let _rx_ be the *this* value.
@@ -366,11 +346,11 @@
           1. Return _A_.
         1. Else _result_ is not *null*,
           1. <del>Let _matchStr_ be ? ToString(? Get(_result_, `"0"`)).</del>
-          1. <ins>Let _matchValue_ be ? CoerceMatchResult( ? Get(_result_, "0"), _matchOptions_).</ins>
-          1. Let _status_ be CreateDataProperty(_A_, ! ToString(_n_), <del>_matchStr_</del><ins>_matchValue_</ins>).
+          1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_result_, `"0"`), _matchOptions_).</ins>
+          1. Let _status_ be CreateDataProperty(_A_, ! ToString(_n_), <del>_matchStr_</del><ins>_matchResult_.[[Value]]</ins>).
           1. Assert: _status_ is *true*.
           1. <del>If _matchStr_ is the empty String, then</del>
-          1. <ins>If ? IsEmptyMatch(_rx_, _matchOptions_) is *true*, then</ins>
+          1. <ins>If _matchResult_.[[IsEmpty]] is *true*, then</ins>
             1. Let _thisIndex_ be ? ToLength(? Get(_rx_, `"lastIndex"`)).
             1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
             1. Perform ? Set(_rx_, `"lastIndex"`, _nextIndex_, *true*).
@@ -384,7 +364,7 @@
   </emu-clause>
 
   <emu-clause id="sec-regexp-prototype-@@matchall">
-    <h1>RegExp.prototype [ @@matchAll ] ( _string_ <ins>[, _options_]</ins>)</h1>
+    <h1>RegExp.prototype [ @@matchAll ] ( _string_ <ins>[ , _options_ ]</ins>)</h1>
     <p>When the `@@matchAll` method is called with argument _string_ <ins> and optional argument _options_</ins>, the following steps are taken:</p>
     <emu-alg>
     1. Let _R_ be the *this* value.
@@ -452,13 +432,13 @@
       1. Else,
         1. If _global_ is *true*,
           1. <del>Let _matchStr_ be ? ToString(? Get(_match_, `"0"`)).</del>
-          1. <ins>Let _matchValue_ be ? CoerceMatchResult( ? Get(_match_, "0"), _matchOptions_).</ins>
+          1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_match_, "0"), _matchOptions_).</ins>
           1. <del>If _matchStr_ is the empty String, then</del>
-          1. <ins>If ? IsEmptyMatch(_match_, _matchOptions_) is *true*, then</ins>
+          1. <ins>If _matchResult_.[[IsEmpty]] is *true*, then</ins>
             1. Let _thisIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
             1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
             1. Perform ? Set(_R_, `"lastIndex"`, _nextIndex_, *true*).
-          1. Return ! CreateIterResultObject(_match_, *false*).
+          1. Return ! CreateIterResultObject(<del>_match_</del><ins>_matchResult_.[[Value]]</ins>, *false*).
         1. Else,
           1. Set _O_.[[Done]] to *true*.
           1. Return ! CreateIterResultObject(_match_, *false*).
