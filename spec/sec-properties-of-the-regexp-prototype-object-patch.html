@@ -2,45 +2,14 @@
   <h1>Properties of the RegExp Prototype Object</h1>
 
   <emu-clause id="sec-regexp.prototype.exec">
-    <h1>RegExp.prototype.exec ( _string_ <ins>[ , _options_ ]</ins> )</h1>
-    <p>Performs a regular expression match of _string_ against the regular expression and returns an Array object containing the results of the match, or *null* if _string_ did not match.</p>
-    <p>The String ToString(_string_) is searched for an occurrence of the regular expression pattern as follows:</p>
-    <emu-alg>
-    1. Let _R_ be the *this* value.
-    1. If Type(_R_) is not Object, throw a *TypeError* exception.
-    1. If _R_ does not have a [[RegExpMatcher]] internal slot, throw a *TypeError* exception.
-    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
-    1. Let _S_ be ? ToString(_string_).
-    1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _matchOptions_</ins>).
-    </emu-alg>
-
-    <emu-clause id="sec-regexpexec" aoid="RegExpExec">
-      <h1>Runtime Semantics: RegExpExec ( _R_, _S_<ins>, _matchOptions_</ins> )</h1>
-      <p>The abstract operation RegExpExec with arguments _R_<del> and</del><ins>,</ins> _S_<ins> and _matchOptions_</ins> performs the following steps:</p>
-      <emu-alg>
-      1. Assert: Type(_R_) is Object.
-      1. Assert: Type(_S_) is String.
-      1. <ins>Assert: _matchOptions_ is a MatchOptions Record.</ins>
-      1. Let _exec_ be ? Get(_R_, `"exec"`).
-      1. If IsCallable(_exec_) is *true*, then
-        1. Let _result_ be ? Call(_exec_, _R_, &laquo; _S_<ins>, ! FromMatchOptions(_matchOptions_)</ins> &raquo;).
-        1. If Type(_result_) is neither Object nor Null, throw a *TypeError* exception.
-        1. Return _result_.
-      1. Perform ? RequireInternalSlot(_R_, [[RegExpMatcher]]).
-      1. Return ? RegExpBuiltinExec(_R_, _S_<ins>, _matchOptions_</ins>).
-      </emu-alg>
-      <emu-note>
-        <p>If a callable `exec` property is not found this algorithm falls back to attempting to use the built-in RegExp matching algorithm. This provides compatible behaviour for code written for prior editions where most built-in algorithms that use regular expressions did not perform a dynamic property lookup of `exec`.</p>
-      </emu-note>
-    </emu-clause>
-
+    <h1>RegExp.prototype.exec ( _string_ )</h1>
+    
     <emu-clause id="sec-regexpbuiltinexec" aoid="RegExpBuiltinExec">
-      <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ <ins>, _matchOptions_</ins> )</h1>
-      <p>The abstract operation RegExpBuiltinExec with arguments _R_<del> and</del><ins>,</ins> _S_ <ins>and _matchOptions_</ins> performs the following steps:</p>
+      <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ )</h1>
+      <p>The abstract operation RegExpBuiltinExec with arguments _R_ and _S_ performs the following steps:</p>
       <emu-alg>
       1. Assert: _R_ is an initialized RegExp instance.
       1. Assert: Type(_S_) is String.
-      1. <ins>Assert: _matchOptions_ is a MatchOptions Record.</ins>
       1. Let _length_ be the number of code units in _S_.
       1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
       1. Let _flags_ be _R_.[[OriginalFlags]].
@@ -79,33 +48,49 @@
       1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
       1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
       1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-      1. <ins>Let _matchedValue_ be ! GetMatchResult(_S_, _lastIndex_, _e_, _matchOptions_)</ins>
+      1. <ins>Let _indices_ be a new empty List.</ins>
+      1. <ins>Let _matchedIndices_ be Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_, [[GroupName]]: *undefined* }.</ins>
+      1. <ins>Add _matchedIndices_ as the last element of _indices_.</ins>
+      1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _matchedIndices_)</ins>
       1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
       1. If _R_ contains any |GroupName|, then
         1. Let _groups_ be ObjectCreate(*null*).
       1. Else,
         1. Let _groups_ be *undefined*.
       1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
+      1. <ins>Let _getIndicies_ be MakeGetIndices(_S_, _indices_).</ins>
+      1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndicies_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
       1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, do
         1. Let _captureI_ be _i_<sup>th</sup> element of _r_'s _captures_ List.
-        1. If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.
+        1. <del>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</del>
         1. <del>Else if _fullUnicode_ is *true*, then</del>
           1. <del>Assert: _captureI_ is a List of code points.</del>
           1. <del>Let _capturedValue_ be the String value whose code units are the UTF16Encoding of the code points of _captureI_.</del>
         1. <del>Else _fullUnicode_ is *false*,</del>
           1. <del>Assert: _captureI_ is a List of code units.</del>
           1. <del>Let _capturedValue_ be the String value consisting of the code units of _captureI_.</del>
+        1. <ins>If the _i_th capture of _R_ was defined with a |GroupName|, then</ins>
+          1. <ins>Let _capturedGroup_ be the StringValue of the corresponding |RegExpIdentifierName|.</ins>
+        1. <ins>Else,</ins>
+          1. <ins>Let _capturedGroup_ be *undefined*.</ins>
+        1. <ins>If _captureI_ is *undefined*, then</ins>
+          1. <ins>Let _capturedValue_ be *undefined*.</ins>
+          1. <ins>Add *undefined* as the last element of _indices_.</ins>
         1. <ins>Else,</ins>
           1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
           1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
           1. <ins>If _fullUnicode_ is *true*, then</ins>
             1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
             1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
-          1. <ins>Let _capturedValue_ be ! GetMatchResult(_S_, _captureStart_, _captureEnd_, _matchOptions_).</ins>
+          1. <ins>Let _capturedIndices_ be Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_, [[GroupName]]: _capturedGroup_ }.</ins>
+          1. <ins>Add _capturedIndices_ as the last element of _indices_.</ins>
+          1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capturedIndices_).</ins>
         1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
-        1. If the _i_th capture of _R_ was defined with a |GroupName|, then
-          1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
-          1. Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).
+        1. <del>If the _i_th capture of _R_ was defined with a |GroupName|, then</del>
+          1. <del>Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.</del>
+          1. <del>Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).</del>
+        1. <ins>If _capturedGroup_ is not *undefined*, then</ins>
+          1. <ins>Perform ! CreateDataProperty(_groups_, _capturedGroup_, _capturedValue_).</ins>
       1. Return _A_.
       </emu-alg>
     </emu-clause>
@@ -122,121 +107,71 @@
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-getmatchresult" aoid="GetMatchResult">
-      <h1><ins>GetMatchResult ( _S_, _startIndex_, _endIndex_, _matchOptions_ )</ins></h1>
-      <p>The abstract operation GetMatchResult with arguments _S_, _startIndex_, _endIndex_, and _matchOptions_ performs the following steps:</p>
+    <emu-clause id="sec-getmatchstring" aoid="GetMatchString">
+      <h1><ins>GetMatchString ( _S_, _match_ )</ins></h1>
+      <p>The abstract operation GetMatchResult with arguments _S_ and _match_ performs the following steps:</p>
       <emu-alg>
       1. Assert: Type(_S_) is String.
-      1. Assert: _startIndex_ is an integer index into _S_.
-      1. Assert: _endIndex_ is an integer index into _S_ that is greater than or equal to _startIndex_.
-      1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Capture]] is `"indices"`, then
-        1. Return CreateArrayFromList(&laquo; _startIndex_, _endIndex_ &raquo;).
-      1. Else,
-        1. Return the portion of _S_ between offset _startIndex_ inclusive and offset _endIndex_ exclusive.
+      1. Assert: _match_ is a Match Record.
+      1. Assert: _match_.[[StartIndex]] is an integer index into _S_.
+      1. Assert: _match_.[[EndIndex]] is an integer index into _S_ that is greater than or equal to _match_.[[StartIndex]].
+      1. Return the portion of _S_ between offset _match_.[[StartIndex]] inclusive and offset _match_.[[EndIndex]] exclusive.
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-coercematchresult" aoid="CoerceMatchResult">
-      <h1><ins>CoerceMatchResult ( _match_, _matchOptions_ )</ins></h1>
-      <p>The abstract operation CoerceMatchResult with arguments _match_ and _matchOptions_ performs the following steps:</p>
+    <emu-clause id="sec-getmatchindicesarray" aoid="GetMatchIndicesArray">
+      <h1><ins>GetMatchIndicesArray ( _S_, _match_ )</ins></h1>
+      <p>The abstract operation GetMatchIndicesArray with arguments _S_ and _match_ performs the following steps:</p>
       <emu-alg>
-      1. Assert: _matchOptions_ is a MatchOptions Record.
-      1. If _matchOptions_.[[Capture]] is `"indices"`, then
-        1. If Type(_match_) is not Object, throw a *TypeError* exception.
-        1. Let _start_ be ? Get(_match_, `"0"`).
-        1. Let _end_ be ? Get(_match_, `"1"`).
-        1. If Type(_start_) is not Number, throw a *TypeError* exception.
-        1. If Type(_end_) is not Number, throw a *TypeError* exception.
-        1. Let _matchValue_ be _match_.
-        1. Let _isEmpty_ be _start_ = _end_.
-      1. Else,
-        1. Let _matchValue_ be ? ToString(_match_).
-        1. If _matchValue_ is the empty String, let _isEmpty_ be *true*.
-        1. Else, let _isEmpty_ be *false*.
-      1. Return a new Record { [[Value]]: _matchValue_, [[IsEmpty]]: _isEmpty_ }.
+      1. Assert: Type(_S_) is String.
+      1. Assert: _match_ is a Match Record.
+      1. Assert: _match_.[[StartIndex]] is an integer index into _S_.
+      1. Assert: _match_.[[EndIndex]] is an integer index into _S_ that is greater than or equal to _match_.[[StartIndex]].
+      1. Return CreateArrayFromList(&laquo; _match_.[[StartIndex]], _match_.[[EndIndex]] &raquo;).
       </emu-alg>
     </emu-clause>
 
-  <emu-clause id="sec-regexp.prototype-@@match">
-    <h1>RegExp.prototype [ @@match ] ( _string_ <ins>[ , _options_ ]</ins> )</h1>
-    <p>When the `@@match` method is called with argument _string_ <ins> and optional argument _options_</ins>, the following steps are taken:</p>
-    <emu-alg>
-    1. Let _rx_ be the *this* value.
-    1. If Type(_rx_) is not Object, throw a *TypeError* exception.
-    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
-    1. Let _S_ be ? ToString(_string_).
-    1. Let _global_ be ToBoolean(? Get(_rx_, `"global"`)).
-    1. If _global_ is *false*, then
-      1. Return ? RegExpExec(_rx_, _S_<ins>, _matchOptions_</ins>).
-    1. Else _global_ is *true*,
-      1. Let _fullUnicode_ be ToBoolean(? Get(_rx_, `"unicode"`)).
-      1. Perform ? Set(_rx_, `"lastIndex"`, 0, *true*).
-      1. Let _A_ be ! ArrayCreate(0).
-      1. Let _n_ be 0.
-      1. Repeat,
-        1. Let _result_ be ? RegExpExec(_rx_, _S_<ins>, _matchOptions_</ins>).
-        1. If _result_ is *null*, then
-          1. If _n_=0, return *null*.
-          1. Return _A_.
-        1. Else _result_ is not *null*,
-          1. <del>Let _matchStr_ be ? ToString(? Get(_result_, `"0"`)).</del>
-          1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_result_, `"0"`), _matchOptions_).</ins>
-          1. Let _status_ be CreateDataProperty(_A_, ! ToString(_n_), <del>_matchStr_</del><ins>_matchResult_.[[Value]]</ins>).
-          1. Assert: _status_ is *true*.
-          1. <del>If _matchStr_ is the empty String, then</del>
-          1. <ins>If _matchResult_.[[IsEmpty]] is *true*, then</ins>
-            1. Let _thisIndex_ be ? ToLength(? Get(_rx_, `"lastIndex"`)).
-            1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
-            1. Perform ? Set(_rx_, `"lastIndex"`, _nextIndex_, *true*).
-          1. Set _n_ to _n_ + 1.
-    </emu-alg>
-    <p>The value of the `name` property of this function is `"[Symbol.match]"`.</p>
-    <emu-note>
-      <p>The @@match property is used by the IsRegExp abstract operation to identify objects that have the basic behaviour of regular expressions. The absence of a @@match property or the existence of such a property whose value does not Boolean coerce to *true* indicates that the object is not intended to be used as a regular expression object.</p>
-    </emu-note>
-
-  </emu-clause>
-
-  <emu-clause id="sec-regexp-prototype-@@matchall">
-    <h1>RegExp.prototype [ @@matchAll ] ( _string_ <ins>[ , _options_ ]</ins>)</h1>
-    <p>When the `@@matchAll` method is called with argument _string_ <ins> and optional argument _options_</ins>, the following steps are taken:</p>
-    <emu-alg>
-    1. Let _R_ be the *this* value.
-    1. If Type(_R_) is not Object, throw a *TypeError* exception.
-    1. Let _S_ be ? ToString(_string_).
-    1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
-    1. Let _C_ be ? SpeciesConstructor(_R_, %RegExp%).
-    1. Let _flags_ be ? ToString(? Get(_R_, `"flags"`)).
-    1. Let _matcher_ be ? Construct(_C_, &laquo; _R_, _flags_ &raquo;).
-    1. Let _lastIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
-    1. Perform ? Set(_matcher_, `"lastIndex"`, _lastIndex_, *true*).
-    1. If _flags_ contains `"g"`, let _global_ be *true*.
-    1. Else, let _global_ be *false*.
-    1. If _flags_ contains `"u"`, let _fullUnicode_ be *true*.
-    1. Else, let _fullUnicode_ be *false*.
-    1. Return ! CreateRegExpStringIterator(_matcher_, _S_, _global_, _fullUnicode_<ins>, _matchOptions_</ins>).
-    </emu-alg>
-    <p>The value of the *name* property of this function is *"[Symbol.matchAll]"*.</p>
-
-    <emu-clause id="sec-createregexpstringiterator" aoid="CreateRegExpStringIterator">
-      <h1>CreateRegExpStringIterator ( _R_, _S_, _global_, _fullUnicode_<ins>, _matchOptions_</ins> )</h1>
-      <p>The abstract operation CreateRegExpStringIterator is used to create such iterator objects. It performs the following steps:</p>
+    <emu-clause id="sec-makegetindices" aoid="MakeGetIndices">
+      <h1><ins>MakeGetIndices ( _S_, _indices_ )</ins></h1>
       <emu-alg>
       1. Assert: Type(_S_) is String.
-      1. Assert: Type(_global_) is Boolean.
-      1. Assert: Type(_fullUnicode_) is Boolean.
-      1. <ins>Assert: _matchOptions_ is a MatchOptions Record.</ins>
-      1. Let _iterator_ be ObjectCreate(<emu-xref href="#table-properties-of-regexp-string-iterator-instances">%RegExpStringIteratorPrototype%</emu-xref>, &laquo; [[IteratingRegExp]], [[IteratedString]], [[Global]], [[Unicode]]<ins>, [[MatchOptions]]</ins>, [[Done]] &raquo;).
-      1. Set _iterator_.[[IteratingRegExp]] to _R_.
-      1. Set _iterator_.[[IteratedString]] to _S_.
-      1. Set _iterator_.[[Global]] to _global_.
-      1. Set _iterator_.[[Unicode]] to _fullUnicode_.
-      1. <ins>Set _iterator_.[[MatchOptions]] to _matchOptions_.</ins>
-      1. Set _iterator_.[[Done]] to *false*.
-      1. Return _iterator_.
+      1. Assert: _indices_ is a List where each element is either a Match Record or is *undefined*.
+      1. Let _steps_ be the steps of a GetIndices function as specified below.
+      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesList]], [[MatchIndicesArray]] &rqauo;).
+      1. Set _getter_.[[InputString]] to _S_.
+      1. Set _getter_.[[MatchIndicesList]] to _indices_.
+      1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
+      1. Return _getter_.
+      </emu-alg>
+      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndicesList]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
+      <emu-alg>
+      1. Let _f_ be the active function object.
+      1. Let _A_ be _f_.[[MatchIndicesArray]].
+      1. If _A_ is not *undefined*, then
+        1. Return _A_.
+      1. Let _S_ be _f_.[[InputString]].
+      1. Let _indices_ be _f_.[[MatchIndicesList]].
+      1. Let _n_ be the number of elements in _indices_.
+      1. Assert: _n_ &lt; 2<sup>32</sup>-1.
+      1. Set _A_ to ! ArrayCreate(_n_).
+      1. Assert: The value of _A_'s `"length"` property is _n_.
+      1. If there exists an _element_ of _indices_ such that _element_ is a Match Record and _element_.[[GroupName]] is not *undefined*, then
+        1. Let _groups_ be ! ObjectCreate(*null*).
+      1. Else,
+        1. Let _groups_ be *undefined*.
+      1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
+      1. For each integer _i_ such that _i_ &gt; 0 and _i_ &lt; _n_, do
+        1. Let _matchIndices_ be _i_<sup>th</sup> element of _indices_.
+        1. If _matchIndices_ is not *undefined*, then
+          1. Let _matchIndicesArray_ be ! GetMatchIndicesArray(_S_, _matchIndices_).
+          1. If _matchIndices_.[[GroupName]] is not *undefined*, then
+            1. Perform ! CreateDataProperty(_groups_, _matchIndices_.[[GroupName]], _matchIndicesArray_).
+        1. Else,
+          1. Let _matchIndicesArray_ be *undefined*.
+        1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _matchIndicesArray_).
+      1. Set _f_.[[MatchIndicesArray]] to _A_.
+      1. Return _A_.
       </emu-alg>
     </emu-clause>
   </emu-clause>
-
 </emu-clause>
