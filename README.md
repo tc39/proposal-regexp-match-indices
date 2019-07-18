@@ -40,23 +40,12 @@ sufficient. For example, an ECMAScript implementation of TextMate Language synta
 needs more than just the `index` of the _match_, but also the offsets for individual capture
 groups.
 
-As such, we propose the addition of an optional `options` argument to `Regex.prototype.exec`,
-`String.prototype.match`, `String.prototype.matchAll`, and `String.prototype.replace` that would
-take an object with properties that could inform the runtime to capture the indices of each match
-rather than the string, to be used as the elements of the resulting _match_ array. The structure of
-the resulting _match_ array itself does not change (it still would have own `index`, `input`, and
-(optional) `groups` properties), but rather the value of each element would be derived from a
-property on `options`:
-
-```ts
-regex.exec(string, { capture: "indices" })
-string.match(regexp, { capture: "indices" })
-string.matchAll(regexp, { capture: "indices" })
-string.replace(searchValue, replaceFn, { capture: "indices" })
-```
-
-By making `options` an optional argument object, future proposals could seek to modify RegExp 
-behavior by specifying additional properties on the object.
+As such, we propose the adoption of an additional `indices` property on the array result (the 
+_substrings array_) of `RegExp.prototype.exec()`. This property would itself be an _indices array_ 
+containing a pair of start and end indices for each captured substring. Any _unmatched_ capture 
+groups would be `undefined`, similar to their corresponding element in the _substrings array_. 
+In addition, the _indices array_ would itself have a `groups` property containing the start and end
+indices for each named capture group.
 
 <!--#endregion:motivations-->
 
@@ -85,28 +74,23 @@ const re1 = /a*(?<Z>z)?/;
 
 // indices are relative to start of the input string:
 const s1 = "xaaaz";
-const m1 = re1.exec(s1, { capture: "indices" });
-m1[0][0] === 1;
-m1[0][1] === 5;
-s1.slice(...m1[0]) === "aaaz";
+const m1 = re1.exec(s1);
+m1.indices[0][0] === 1;
+m1.indices[0][1] === 5;
+s1.slice(...m1.indices[0]) === "aaaz";
 
-m1[1][0] === 4;
-m1[1][1] === 5;
-s1.slice(...m1[1]) === "z";
+m1.indices[1][0] === 4;
+m1.indices[1][1] === 5;
+s1.slice(...m1.indices[1]) === "z";
 
-m1.groups["Z"][0] === 4;
-m1.groups["Z"][1] === 5;
-s1.slice(...m1.groups["Z"]) === "z";
+m1.indices.groups["Z"][0] === 4;
+m1.indices.groups["Z"][1] === 5;
+s1.slice(...m1.indices.groups["Z"]) === "z";
 
 // capture groups that are not matched return `undefined`:
-const m2 = re1.exec("xaaay", { capture: "indices" });
-m2[1] === undefined;
-m2.groups["Z"] === undefined;
-
-// the following three statements are functionally equivalent:
-re1.exec(text);
-re1.exec(text, { });
-re1.exec(text, { capture: "strings" }); // default behavior
+const m2 = re1.exec("xaaay");
+m2.indices[1] === undefined;
+m2.indices.groups["Z"] === undefined;
 ```
 <!--#endregion:examples-->
 
