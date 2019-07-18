@@ -1,0 +1,105 @@
+<emu-clause id="sec-pattern-semantics">
+  <h1>Pattern Semantics</h1>
+
+  <emu-clause id="sec-notation">
+    <h1>Notation</h1>
+    <p>The descriptions below use the following variables:</p>
+    <ul>
+      <li>
+        _Input_ is a List consisting of all of the characters, in order, of the String being matched by the regular expression pattern. Each character is either a code unit or a code point, depending upon the kind of pattern involved. The notation _Input_[_n_] means the _n_<sup>th</sup> character of _Input_, where _n_ can range between 0 (inclusive) and _InputLength_ (exclusive).
+      </li>
+      <li>
+        _InputLength_ is the number of characters in _Input_.
+      </li>
+      <li>
+        _NcapturingParens_ is the total number of left-capturing parentheses (i.e. the total number of <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> Parse Nodes) in the pattern. A left-capturing parenthesis is any `(` pattern character that is matched by the `(` terminal of the <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> production.
+      </li>
+      <li>
+        _DotAll_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"s"` and otherwise is *false*.
+      </li>
+      <li>
+        _IgnoreCase_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"i"` and otherwise is *false*.
+      </li>
+      <li>
+        _Multiline_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"m"` and otherwise is *false*.
+      </li>
+      <li>
+        _Unicode_ is *true* if the RegExp object's [[OriginalFlags]] internal slot contains `"u"` and otherwise is *false*.
+      </li>
+    </ul>
+    <p>Furthermore, the descriptions below use the following internal data structures:</p>
+    <ul>
+      <li>
+        A <em>CharSet</em> is a mathematical set of characters, either code units or code points depending up the state of the _Unicode_ flag. &ldquo;All characters&rdquo; means either all code unit values or all code point values also depending upon the state of _Unicode_.
+      </li>
+      <li>
+        <ins>A <em>Range</em> is an ordered pair (_startIndex_, _endIndex_) represents the range of characters included in a capture, where _startIndex_ is an integer representing the start index (inclusive) of the range within _Input_ and _endIndex_ is an integer representing the end index (exclusive) of the range within _Input_. For any <em>Range</em>, these indices must satisfy the invariant that _startIndex_ ≤ _endIndex_.</ins>
+      </li>
+      <li>
+        A <em>State</em> is an ordered pair (_endIndex_, _captures_) where _endIndex_ is an integer representing an index within _Input_ and _captures_ is a List of _NcapturingParens_ values. States are used to represent partial match states in the regular expression matching algorithms. The _endIndex_ is one plus the index of the last input character matched so far by the pattern, while _captures_ holds the results of capturing parentheses. The _n_<sup>th</sup> element of _captures_ is either a List that represents the <del>value</del><ins><em>Range</em></ins> obtained by the _n_<sup>th</sup> set of capturing parentheses or *undefined* if the _n_<sup>th</sup> set of capturing parentheses hasn't been reached yet. Due to backtracking, many States may be in use at any time during the matching process.
+      </li>
+      <li>
+        A <em>MatchResult</em> is either a State or the special token ~failure~ that indicates that the match failed.
+      </li>
+      <li>
+        A <em>Continuation</em> procedure is an internal closure (i.e. an internal procedure with some arguments already bound to values) that takes one State argument and returns a MatchResult result. If an internal closure references variables which are bound in the function that creates the closure, the closure uses the values that these variables had at the time the closure was created. The Continuation attempts to match the remaining portion (specified by the closure's already-bound arguments) of the pattern against _Input_, starting at the intermediate state given by its State argument. If the match succeeds, the Continuation returns the final State that it reached; if the match fails, the Continuation returns ~failure~.
+      </li>
+      <li>
+        A <em>Matcher</em> procedure is an internal closure that takes two arguments &mdash; a State and a Continuation &mdash; and returns a MatchResult result. A Matcher attempts to match a middle subpattern (specified by the closure's already-bound arguments) of the pattern against _Input_, starting at the intermediate state given by its State argument. The Continuation argument should be a closure that matches the rest of the pattern. After matching the subpattern of a pattern to obtain a new State, the Matcher then calls Continuation on that new State to test if the rest of the pattern can match as well. If it can, the Matcher returns the State returned by Continuation; if not, the Matcher may try different choices at its choice points, repeatedly calling Continuation until it either succeeds or all possibilities have been exhausted.
+      </li>
+      <li>
+        An <em>AssertionTester</em> procedure is an internal closure that takes a State argument and returns a Boolean result. The assertion tester tests a specific condition (specified by the closure's already-bound arguments) against the current place in _Input_ and returns *true* if the condition matched or *false* if not.
+      </li>
+    </ul>
+  </emu-clause>
+
+  <emu-clause id="sec-atom">
+    <h1>Atom</h1>
+    <p>With parameter _direction_.</p>
+    <p>The production <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> evaluates as follows:</p>
+    <emu-alg>
+      1. Evaluate |Disjunction| with argument _direction_ to obtain a Matcher _m_.
+      1. Let _parenIndex_ be the number of left-capturing parentheses in the entire regular expression that occur to the left of this |Atom|. This is the total number of <emu-grammar>Atom :: `(` GroupSpecifier Disjunction `)`</emu-grammar> Parse Nodes prior to or enclosing this |Atom|.
+      1. Return an internal Matcher closure that takes two arguments, a State _x_ and a Continuation _c_, and performs the following steps:
+        1. Let _d_ be an internal Continuation closure that takes one State argument _y_ and performs the following steps:
+          1. Let _cap_ be a copy of _y_'s _captures_ List.
+          1. Let _xe_ be _x_'s _endIndex_.
+          1. Let _ye_ be _y_'s _endIndex_.
+          1. If _direction_ is equal to +1, then
+            1. Assert: _xe_ &le; _ye_.
+            1. <del>Let _s_ be a new List whose elements are the characters of _Input_ at indices _xe_ (inclusive) through _ye_ (exclusive).</del>
+            1. <ins>Let _r_ be the Range (_xe_, _ye_).</ins>
+          1. Else,
+            1. Assert: _direction_ is equal to -1.
+            1. Assert: _ye_ &le; _xe_.
+            1. <del>Let _s_ be a new List whose elements are the characters of _Input_ at indices _ye_ (inclusive) through _xe_ (exclusive).</del>
+            1. <ins>Let _r_ be the Range (_ye_, _xe_).</ins>
+          1. Set _cap_[_parenIndex_+1] to <del>_s_</del><ins>_r_</ins>.
+          1. Let _z_ be the State (_ye_, _cap_).
+          1. Call _c_(_z_) and return its result.
+        1. Call _m_(_x_, _d_) and return its result.
+    </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="sec-atomescape">
+    <h1>AtomEscape</h1>
+    <emu-clause id="sec-backreference-matcher" aoid="BackreferenceMatcher">
+      <h1>Runtime Semantics: BackreferenceMatcher ( _n_, _direction_ )</h1>
+      <p>The abstract operation BackreferenceMatcher takes two arguments, an integer _n_ and an integer _direction_, and performs the following steps:</p>
+      <emu-alg>
+        1. Return an internal Matcher closure that takes two arguments, a State _x_ and a Continuation _c_, and performs the following steps:
+          1. Let _cap_ be _x_'s _captures_ List.
+          1. Let <del>_s_</del><ins>_r_</ins> be _cap_[_n_].
+          1. If <del>_s_</del><ins>_r_</ins> is *undefined*, return _c_(_x_).
+          1. Let _e_ be _x_'s _endIndex_.
+          1. Let _len_ be <del>the number of elements in _s_</del><ins>_r_._endIndex_ - _r_._startIndex_</ins>.
+          1. Let _f_ be _e_ + _direction_ &times; _len_.
+          1. If _f_ &lt; 0 or _f_ &gt; _InputLength_, return ~failure~.
+          1. Let _g_ be min(_e_, _f_).
+          1. If there exists an integer _i_ between 0 (inclusive) and _len_ (exclusive) such that Canonicalize(<del>_s_[_i_]</del><ins>_Input_[_r_._startIndex_ + _i_]</ins>) is not the same character value as Canonicalize(_Input_[_g_ + _i_]), return ~failure~.
+          1. Let _y_ be the State (_f_, _cap_).
+          1. Call _c_(_y_) and return its result.
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>

@@ -1,0 +1,58 @@
+<emu-clause id="sec-regexp-abstract-operations">
+  <h1>RegExp Abstract Operations</h1>
+
+  <emu-clause id="sec-matchoptions-records">
+    <h1><ins>MatchOptions Records</ins></h1>
+    <ins>
+    <p>A <dfn>MatchOptions</dfn> is a Record value used to encapsulate options for a regular expression matching operation.</p>
+    <p>MatchOptions Records have the fields listed in <emu-xref href="#table-matchoptions-record"></emu-xref>.</p>
+    </ins>
+    <emu-table id="table-matchoptions-record" caption="MatchOptions Record Fields">
+      <table>
+        <tbody>
+          <tr>
+            <th>Field Name</th>
+            <th>Value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>[[Capture]]</td>
+            <td>`"strings"` or `"indices"`</td>
+            <td>Whether the operation should capture substrings or the start/end indices of the capture.</td>
+          </tr>
+        </tbody>
+      </table>
+    </emu-table>
+  </emu-clause>
+
+  <emu-clause id="sec-frommatchoptions" aoid="FromMatchOptions">
+    <h1><ins>FromMatchOptions ( _Options_ )</ins></h1>
+    <p>
+      When the abstract operation FromMatchOptions is called with argument _Options_, the following steps are taken:
+    </p>
+    <emu-alg>
+    1. Assert: _Options_ is a MatchOptions Record.
+    1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
+    1. Assert: _obj_ is an extensible ordinary object with no own properties.
+    1. Perform CreateDataProperty(_obj_, `"capture"`, _Options_.[[Capture]]).
+    1. Assert: All of the above CreateDataProperty operations return *true*.
+    1. Return _obj_.
+    </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="sec-tomatchoptions" aoid="ToMatchOptions">
+    <h1><ins>ToMatchOptions ( _Options_ )</ins></h1>
+    <p>
+      When the abstract operation ToMatchOptions is called with argument _Options_, the following steps are taken:
+    </p>
+    <emu-alg>
+    1. If _Options_ is *undefined* or *null*, then
+      1. Let _optionsObj_ be *undefined*.
+    1. Else,
+      1. Let _optionsObj_ be ? ToObject(_Options_).
+    1. Let _capture_ be ? GetOption(_optionsObj_, `"capture"`, String, `"strings"`, &laquo; `"strings"`, `"indices"` &raquo;).
+    1. Return a new MatchOptions { [[Capture]]: _capture_ }.
+    </emu-alg>
+  </emu-clause>
+  </ins>
+</emu-clause>

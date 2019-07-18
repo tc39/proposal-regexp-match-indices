@@ -1,0 +1,80 @@
+<emu-clause id="sec-regexp-string-iterator-objects">
+  <h1>RegExp String Iterator Objects</h1>
+
+  <emu-clause id="sec-%regexpstringiteratorprototype%-object">
+    <h1>The %RegExpStringIteratorPrototype% Object</h1>
+
+    <emu-clause id="sec-%regexpstringiteratorprototype%.next">
+      <h1>%RegExpStringIteratorPrototype%.next ( )</h1>
+      <emu-alg>
+      1. Let _O_ be the *this* value.
+      1. If Type(_O_) is not Object, throw a *TypeError* exception.
+      1. If _O_ does not have all of the internal slots of a RegExp String Iterator Object Instance (see <emu-xref href="#sec-properties-of-regexp-string-iterator-instances"></emu-xref>), throw a *TypeError* exception.
+      1. If _O_.[[Done]] is *true*, then
+        1. Return ! CreateIterResultObject(*undefined*, *true*).
+      1. Let _R_ be _O_.[[IteratingRegExp]].
+      1. Let _S_ be _O_.[[IteratedString]].
+      1. Let _global_ be _O_.[[Global]].
+      1. Let _fullUnicode_ be _O_.[[Unicode]].
+      1. <ins>Let _matchOptions_ be _O_.[[MatchOptions]].</ins>
+      1. Let _match_ be ? RegExpExec(_R_, _S_<ins>, _matchOptions_</ins>).
+      1. If _match_ is *null*, then
+        1. Set _O_.[[Done]] to *true*.
+        1. Return ! CreateIterResultObject(*undefined*, *true*).
+      1. Else,
+        1. If _global_ is *true*,
+          1. <del>Let _matchStr_ be ? ToString(? Get(_match_, `"0"`)).</del>
+          1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_match_, "0"), _matchOptions_).</ins>
+          1. <del>If _matchStr_ is the empty String, then</del>
+          1. <ins>If _matchResult_.[[IsEmpty]] is *true*, then</ins>
+            1. Let _thisIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
+            1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
+            1. Perform ? Set(_R_, `"lastIndex"`, _nextIndex_, *true*).
+          1. Return ! CreateIterResultObject(<del>_match_</del><ins>_matchResult_.[[Value]]</ins>, *false*).
+        1. Else,
+          1. Set _O_.[[Done]] to *true*.
+          1. Return ! CreateIterResultObject(_match_, *false*).
+      </emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-regexp-string-iterator-instances">
+    <h1>Properties of RegExp String Iterator Instances</h1>
+    <p>RegExp String Iterator instances are ordinary objects that inherit properties from the <emu-xref href="#sec-%regexpstringiteratorprototype%-object">%RegExpStringIteratorPrototype%</emu-xref> intrinsic object. RegExp String Iterator instances are initially created with the internal slots listed in <emu-xref href="#table-properties-of-regexp-string-iterator-instances">Table 2</emu-xref>.</p>
+    <emu-table id="table-properties-of-regexp-string-iterator-instances" caption="Internal Slots of RegExp String Iterator Instances">
+      <table>
+        <tbody>
+          <tr>
+            <th>Internal Slot</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>[[IteratingRegExp]]</td>
+            <td>The regular expression used for iteration. IsRegExp([[IteratingRegExp]]) is always initially *true*.</td>
+          </tr>
+          <tr>
+            <td>[[IteratedString]]</td>
+            <td>The String value being iterated upon.</td>
+          </tr>
+          <tr>
+            <td>[[Global]]</td>
+            <td>A Boolean value to indicate whether the [[IteratingRegExp]] is global or not.</td>
+          </tr>
+          <tr>
+            <td>[[Unicode]]</td>
+            <td>A Boolean value to indicate whether the [[IteratingRegExp]] is in Unicode mode or not.</td>
+          </tr>
+          <tr>
+            <td><ins>[[MatchOptions]]</ins></td>
+            <td><ins>A MatchOptions Record.</ins></td>
+          </tr>
+          <tr>
+            <td>[[Done]]</td>
+            <td>A Boolean value to indicate whether the iteration is complete or not.</td>
+          </tr>
+          <tr>
+        </tbody>
+      </table>
+    </emu-table>
+  </emu-clause>
+</emu-clause>
