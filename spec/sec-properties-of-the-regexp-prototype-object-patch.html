@@ -160,7 +160,7 @@
       1. Else,
         1. Let _groups_ be *undefined*.
       1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
-      1. For each integer _i_ such that _i_ &gt; 0 and _i_ &lt; _n_, do
+      1. For each integer _i_ such that _i_ &ge; 0 and _i_ &lt; _n_, do
         1. Let _matchIndices_ be _i_<sup>th</sup> element of _indices_.
         1. If _matchIndices_ is not *undefined*, then
           1. Let _matchIndicesArray_ be ! GetMatchIndicesArray(_S_, _matchIndices_).
