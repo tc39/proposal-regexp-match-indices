@@ -30,7 +30,7 @@
             1. Let _thisIndex_ be ? ToLength(? Get(_R_, `"lastIndex"`)).
             1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
             1. Perform ? Set(_R_, `"lastIndex"`, _nextIndex_, *true*).
-          1. Return ! CreateIterResultObject(<del>_match_</del><ins>_matchResult_.[[Value]]</ins>, *false*).
+          1. Return ! CreateIterResultObject(_match_, *false*).
         1. Else,
           1. Set _O_.[[Done]] to *true*.
           1. Return ! CreateIterResultObject(_match_, *false*).
