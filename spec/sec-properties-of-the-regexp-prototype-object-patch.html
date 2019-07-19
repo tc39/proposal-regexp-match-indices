@@ -109,7 +109,7 @@
 
     <emu-clause id="sec-getmatchstring" aoid="GetMatchString">
       <h1><ins>GetMatchString ( _S_, _match_ )</ins></h1>
-      <p>The abstract operation GetMatchResult with arguments _S_ and _match_ performs the following steps:</p>
+      <p>The abstract operation GetMatchString with arguments _S_ and _match_ performs the following steps:</p>
       <emu-alg>
       1. Assert: Type(_S_) is String.
       1. Assert: _match_ is a Match Record.
@@ -137,7 +137,7 @@
       1. Assert: Type(_S_) is String.
       1. Assert: _indices_ is a List where each element is either a Match Record or is *undefined*.
       1. Let _steps_ be the steps of a GetIndices function as specified below.
-      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesList]], [[MatchIndicesArray]] &rqauo;).
+      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesList]], [[MatchIndicesArray]] &raquo;).
       1. Set _getter_.[[InputString]] to _S_.
       1. Set _getter_.[[MatchIndicesList]] to _indices_.
       1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
