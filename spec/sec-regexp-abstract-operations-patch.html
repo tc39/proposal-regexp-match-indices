@@ -34,8 +34,7 @@
     1. Assert: _Options_ is a MatchOptions Record.
     1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
     1. Assert: _obj_ is an extensible ordinary object with no own properties.
-    1. Perform ! CreateDataProperty(_obj_, `"capture"`, _Options_.[[Capture]]).
-    1. Assert: All of the above CreateDataProperty operations return *true*.
+    1. Perform ! CreateDataPropertyOrThrow(_obj_, `"capture"`, _Options_.[[Capture]]).
     1. Return _obj_.
     </emu-alg>
   </emu-clause>
