@@ -149,12 +149,11 @@
         1. If Type(_start_) is not Number, throw a *TypeError* exception.
         1. If Type(_end_) is not Number, throw a *TypeError* exception.
         1. Let _matchValue_ be _match_.
-        1. Let _isEmpty_ be _start_ = _end_.
+        1. Let _matchLength_ be _end_ - _start_.
       1. Else,
         1. Let _matchValue_ be ? ToString(_match_).
-        1. If _matchValue_ is the empty String, let _isEmpty_ be *true*.
-        1. Else, let _isEmpty_ be *false*.
-      1. Return a new Record { [[Value]]: _matchValue_, [[IsEmpty]]: _isEmpty_ }.
+        1. Let _matchLength_ be the number of code units in _matchValue_.
+      1. Return a new Record { [[Value]]: _matchValue_, [[Length]]: _matchLength_ }.
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -186,7 +185,7 @@
           1. Let _status_ be CreateDataProperty(_A_, ! ToString(_n_), <del>_matchStr_</del><ins>_matchResult_.[[Value]]</ins>).
           1. Assert: _status_ is *true*.
           1. <del>If _matchStr_ is the empty String, then</del>
-          1. <ins>If _matchResult_.[[IsEmpty]] is *true*, then</ins>
+          1. <ins>If _matchResult_.[[Length]] is 0, then</ins>
             1. Let _thisIndex_ be ? ToLength(? Get(_rx_, `"lastIndex"`)).
             1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
             1. Perform ? Set(_rx_, `"lastIndex"`, _nextIndex_, *true*).
@@ -239,5 +238,84 @@
       </emu-alg>
     </emu-clause>
   </emu-clause>
+
+  <emu-clause id="sec-regexp.prototype-@@replace">
+    <h1>RegExp.prototype [ @@replace ] ( _string_, _replaceValue_<ins> [ , _options_ ]</ins> )</h1>
+    <p>When the `@@replace` method is called with arguments _string_<del> and</del><ins>,</ins> _replaceValue_<ins>, and optional argument _options_</ins>, the following steps are taken:</p>
+    <emu-alg>
+      1. Let _rx_ be the *this* value.
+      1. If Type(_rx_) is not Object, throw a *TypeError* exception.
+      1. Let _S_ be ? ToString(_string_).
+      1. Let _lengthS_ be the number of code unit elements in _S_.
+      1. <ins>Let _matchOptions_ be ? ToMatchOptions(_options_).</ins>
+      1. Let _functionalReplace_ be IsCallable(_replaceValue_).
+      1. If _functionalReplace_ is *false*, then
+        1. <ins>If _matchOptions_.[[Capture]] is not `"strings"`, throw a *RangeError* exception.</ins>
+        1. Set _replaceValue_ to ? ToString(_replaceValue_).
+      1. Let _global_ be ToBoolean(? Get(_rx_, `"global"`)).
+      1. If _global_ is *true*, then
+        1. Let _fullUnicode_ be ToBoolean(? Get(_rx_, `"unicode"`)).
+        1. Perform ? Set(_rx_, `"lastIndex"`, 0, *true*).
+      1. Let _results_ be a new empty List.
+      1. Let _done_ be *false*.
+      1. Repeat, while _done_ is *false*
+        1. Let _result_ be ? RegExpExec(_rx_, _S_<ins>, _matchOptions_</ins>).
+        1. If _result_ is *null*, set _done_ to *true*.
+        1. Else,
+          1. Append _result_ to the end of _results_.
+          1. If _global_ is *false*, set _done_ to *true*.
+          1. Else,
+            1. <del>Let _matchStr_ be ? ToString(? Get(_result_, `"0"`)).</del>
+            1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_result_, `"0"`), _matchOptions_).</ins>
+            1. <del>If _matchStr_ is the empty String, then</del>
+            1. <ins>If _matchResult_.[[Length]] is 0, then</ins>
+              1. Let _thisIndex_ be ? ToLength(? Get(_rx_, `"lastIndex"`)).
+              1. Let _nextIndex_ be AdvanceStringIndex(_S_, _thisIndex_, _fullUnicode_).
+              1. Perform ? Set(_rx_, `"lastIndex"`, _nextIndex_, *true*).
+      1. Let _accumulatedResult_ be the empty String value.
+      1. Let _nextSourcePosition_ be 0.
+      1. For each _result_ in _results_, do
+        1. Let _nCaptures_ be ? ToLength(? Get(_result_, `"length"`)).
+        1. Set _nCaptures_ to max(_nCaptures_ - 1, 0).
+        1. <del>Let _matched_ be ? ToString(? Get(_result_, `"0"`)).</del>
+        1. <ins>Let _matchResult_ be ? CoerceMatchResult(? Get(_result_, `"0"`), _matchOptions_).</ins>
+        1. <ins>Let _matched_ be _matchResult_.[[Value]].</ins>
+        1. <del>Let _matchLength_ be the number of code units in _matched_.</del>
+        1. <ins>Let _matchLength_ be _matchResult_.[[Length]].</ins>
+        1. Let _position_ be ? ToInteger(? Get(_result_, `"index"`)).
+        1. Set _position_ to max(min(_position_, _lengthS_), 0).
+        1. Let _n_ be 1.
+        1. Let _captures_ be a new empty List.
+        1. Repeat, while _n_ &le; _nCaptures_
+          1. Let _capN_ be ? Get(_result_, ! ToString(_n_)).
+          1. If _capN_ is not *undefined*, then
+            1. <del>Set _capN_ to ? ToString(_capN_).</del>
+            1. <ins>Let _capNResult_ be ? CoerceMatchResult(_capN_, _matchOptions_).</ins>
+            1. <ins>Set _capN_ to _capNResult_.[[Value]].</ins>
+          1. Append _capN_ as the last element of _captures_.
+          1. Set _n_ to _n_ + 1.
+        1. Let _namedCaptures_ be ? Get(_result_, `"groups"`).
+        1. If _functionalReplace_ is *true*, then
+          1. Let _replacerArgs_ be &laquo; _matched_ &raquo;.
+          1. Append in list order the elements of _captures_ to the end of the List _replacerArgs_.
+          1. Append _position_ and _S_ to _replacerArgs_.
+          1. If _namedCaptures_ is not *undefined*, then
+            1. Append _namedCaptures_ as the last element of _replacerArgs_.
+          1. Let _replValue_ be ? Call(_replaceValue_, *undefined*, _replacerArgs_).
+          1. Let _replacement_ be ? ToString(_replValue_).
+        1. Else,
+          1. <ins>Assert: Type(_matched_) is String.</ins>
+          1. <ins>Assert: _captures_ is a List of String or Undefined values.</ins>
+          1. Let _replacement_ be GetSubstitution(_matched_, _S_, _position_, _captures_, _namedCaptures_, _replaceValue_).
+        1. If _position_ &ge; _nextSourcePosition_, then
+          1. NOTE: _position_ should not normally move backwards. If it does, it is an indication of an ill-behaving RegExp subclass or use of an access triggered side-effect to change the global flag or other characteristics of _rx_. In such cases, the corresponding substitution is ignored.
+          1. Set _accumulatedResult_ to the string-concatenation of the current value of _accumulatedResult_, the substring of _S_ consisting of the code units from _nextSourcePosition_ (inclusive) up to _position_ (exclusive), and _replacement_.
+          1. Set _nextSourcePosition_ to _position_ + _matchLength_.
+      1. If _nextSourcePosition_ &ge; _lengthS_, return _accumulatedResult_.
+      1. Return the string-concatenation of _accumulatedResult_ and the substring of _S_ consisting of the code units from _nextSourcePosition_ (inclusive) up through the final code unit of _S_ (inclusive).
+    </emu-alg>
+    <p>The value of the `name` property of this function is `"[Symbol.replace]"`.</p>
+  </emu-clause>
+
 
 </emu-clause>
