@@ -48,18 +48,18 @@
       1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
       1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
       1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-      1. <ins>Let _indices_ be a new empty List.</ins>
-      1. <ins>Let _matchedIndices_ be Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_, [[GroupName]]: *undefined* }.</ins>
-      1. <ins>Add _matchedIndices_ as the last element of _indices_.</ins>
-      1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _matchedIndices_)</ins>
+      1. <ins>Let _indices_ be the Record { [[Indices]]: &laquo; &raquo; }.</ins>
+      1. <ins>Let _match_ be the Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_, [[GroupName]]: *undefined* }.</ins>
+      1. <ins>Add _match_ as the last element of _indices_.[[Indices]].</ins>
+      1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _match_)</ins>
       1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
       1. If _R_ contains any |GroupName|, then
         1. Let _groups_ be ObjectCreate(*null*).
       1. Else,
         1. Let _groups_ be *undefined*.
       1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
-      1. <ins>Let _getIndicies_ be MakeGetIndices(_S_, _indices_).</ins>
-      1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndicies_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
+      1. <ins>Let _getIndices_ be MakeGetIndices(_S_, _indices_).</ins>
+      1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndices_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
       1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, do
         1. Let _captureI_ be _i_<sup>th</sup> element of _r_'s _captures_ List.
         1. <del>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</del>
@@ -75,16 +75,16 @@
           1. <ins>Let _capturedGroup_ be *undefined*.</ins>
         1. <ins>If _captureI_ is *undefined*, then</ins>
           1. <ins>Let _capturedValue_ be *undefined*.</ins>
-          1. <ins>Add *undefined* as the last element of _indices_.</ins>
+          1. <ins>Add *undefined* as the last element of _indices_.[[Indices]].</ins>
         1. <ins>Else,</ins>
           1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
           1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
           1. <ins>If _fullUnicode_ is *true*, then</ins>
             1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
             1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
-          1. <ins>Let _capturedIndices_ be Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_, [[GroupName]]: _capturedGroup_ }.</ins>
-          1. <ins>Add _capturedIndices_ as the last element of _indices_.</ins>
-          1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capturedIndices_).</ins>
+          1. <ins>Let _capture_ be Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_, [[GroupName]]: _capturedGroup_ }.</ins>
+          1. <ins>Add _capture_ as the last element of _indices_.[[Indices]].</ins>
+          1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capture_).</ins>
         1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
         1. <del>If the _i_th capture of _R_ was defined with a |GroupName|, then</del>
           1. <del>Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.</del>
@@ -135,23 +135,26 @@
       <h1><ins>MakeGetIndices ( _S_, _indices_ )</ins></h1>
       <emu-alg>
       1. Assert: Type(_S_) is String.
-      1. Assert: _indices_ is a List where each element is either a Match Record or is *undefined*.
+      1. Assert: _indices_ is a Record.
+      1. Assert: _indices_ has an [[Indices]] field.
+      1. Assert: _indices_.[[Indices] is a List where each element is either a Match Record or is *undefined*.
       1. Let _steps_ be the steps of a GetIndices function as specified below.
-      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesList]], [[MatchIndicesArray]] &raquo;).
+      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesRecord]], [[MatchIndicesArray]] &raquo;).
       1. Set _getter_.[[InputString]] to _S_.
-      1. Set _getter_.[[MatchIndicesList]] to _indices_.
+      1. Set _getter_.[[MatchIndicesRecord]] to _indices_.
       1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
       1. Return _getter_.
       </emu-alg>
 
-      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndicesList]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
+      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndicesRecord]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
       <emu-alg>
       1. Let _f_ be the active function object.
       1. Let _A_ be _f_.[[MatchIndicesArray]].
       1. If _A_ is not *undefined*, then
         1. Return _A_.
       1. Let _S_ be _f_.[[InputString]].
-      1. Let _indices_ be _f_.[[MatchIndicesList]].
+      1. Let _indicesRecord_ be _f_.[[MatchIndicesRecord]].
+      1. Let _indices_ be _indicesRecord_.[[Indices]].
       1. Let _n_ be the number of elements in _indices_.
       1. Assert: _n_ &lt; 2<sup>32</sup>-1.
       1. Set _A_ to ! ArrayCreate(_n_).
