@@ -1,0 +1,16 @@
+sudo: off
+
+language: node_js
+
+node_js:
+  - stable
+
+script:
+  - bash ./deploy.sh
+
+env:
+  global:
+    - ENCRYPTION_LABEL: "8ca805d696d5"
+    - GH_USER_NAME: "rbuckton"
+    - GH_USER_EMAIL: "ron.buckton@microsoft.com"
+    - PRIVATE_KEY_FILE_NAME: "deploy_key.enc"
