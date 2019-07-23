@@ -58,9 +58,9 @@
       1. Else,
         1. Let _groups_ be *undefined*.
       1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
-      1. <ins>Let _getIndices_ be MakeGetIndices(_S_, _indices_).</ins>
+      1. <ins>Let _getIndices_ be MakeGetIndices(_S_).</ins>
       1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndices_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
-      1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, do
+      1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, in ascending order, do
         1. Let _captureI_ be _i_<sup>th</sup> element of _r_'s _captures_ List.
         1. <del>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</del>
         1. <del>Else if _fullUnicode_ is *true*, then</del>
@@ -91,6 +91,7 @@
           1. <del>Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).</del>
         1. <ins>If _capturedGroup_ is not *undefined*, then</ins>
           1. <ins>Perform ! CreateDataProperty(_groups_, _capturedGroup_, _capturedValue_).</ins>
+      1. <ins>Set _getIndices_.[[MatchIndices]] to _indices_.</ins>
       1. Return _A_.
       </emu-alg>
     </emu-clause>
@@ -132,29 +133,26 @@
     </emu-clause>
 
     <emu-clause id="sec-makegetindices" aoid="MakeGetIndices">
-      <h1><ins>MakeGetIndices ( _S_, _indices_ )</ins></h1>
+      <h1><ins>MakeGetIndices ( _S_ )</ins></h1>
+      <p>The abstract operation MakeGetIndices with argument _S_ performs the following steps:</p>
       <emu-alg>
       1. Assert: Type(_S_) is String.
-      1. Assert: _indices_ is a Record.
-      1. Assert: _indices_ has an [[Indices]] field.
-      1. Assert: _indices_.[[Indices] is a List where each element is either a Match Record or is *undefined*.
       1. Let _steps_ be the steps of a GetIndices function as specified below.
-      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndicesRecord]], [[MatchIndicesArray]] &raquo;).
+      1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndices]], [[MatchIndicesArray]] &raquo;).
       1. Set _getter_.[[InputString]] to _S_.
-      1. Set _getter_.[[MatchIndicesRecord]] to _indices_.
       1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
       1. Return _getter_.
       </emu-alg>
 
-      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndicesRecord]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
+      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndices]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
       <emu-alg>
       1. Let _f_ be the active function object.
       1. Let _A_ be _f_.[[MatchIndicesArray]].
       1. If _A_ is not *undefined*, then
         1. Return _A_.
       1. Let _S_ be _f_.[[InputString]].
-      1. Let _indicesRecord_ be _f_.[[MatchIndicesRecord]].
-      1. Let _indices_ be _indicesRecord_.[[Indices]].
+      1. Let _indices_ be _f_.[[MatchIndices]].
+      1. Assert: _indices_ is a List.
       1. Let _n_ be the number of elements in _indices_.
       1. Assert: _n_ &lt; 2<sup>32</sup>-1.
       1. Set _A_ to ! ArrayCreate(_n_).
