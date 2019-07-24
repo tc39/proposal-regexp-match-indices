@@ -70,7 +70,7 @@ indices for each named capture group.
 # Examples
 
 ```js
-const re1 = /a*(?<Z>z)?/;
+const re1 = /a+(?<Z>z)?/;
 
 // indices are relative to start of the input string:
 const s1 = "xaaaz";
