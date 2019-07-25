@@ -1,20 +1,27 @@
 <!--#region:intro-->
-# RegExp match array offsets for ECMAScript
+# RegExp Match Indices for ECMAScript
 
-ECMAScript `RegExp` match array offsets provide additional information about the start and end 
-position of a captured substring.
+ECMAScript `RegExp` Match Indicies provide additional information about the start and end
+indices of captured substrings relative to the start of the input string.
+
+> NOTE: This proposal was previously named "RegExp Match Array Offsets", but has been renamed
+> to more accurately represent the current status of the proposal.
+
+<!--
+TODO: Update the polyfill
 
 An example implementation can be found in [`regexp-measure`](https://www.npmjs.com/package/regexp-measure).
 > NOTE: `regexp-measure` was built around the Stage 0 proposal and is no longer up to date with respect to
 > the current proposed API design.
 
 * [Stage 0 Presentation](https://docs.google.com/presentation/d/12I8W-uViPXuFu2IAk3yZpXTr5MxLYxCfhJValykyT0E/edit?usp=sharing)
+-->
 <!--#endregion:intro-->
 
 <!--#region:status-->
 ## Status
 
-**Stage:** 2
+**Stage:** 3
 **Champion:** Ron Buckton (@rbuckton)
 
 _For detailed status of this proposal see [TODO](#todo), below._
@@ -37,8 +44,8 @@ groups.
 
 However, there are several more advanced scenarios where this information may not necessarily be
 sufficient. For example, an ECMAScript implementation of TextMate Language syntax highlighting
-needs more than just the `index` of the _match_, but also the offsets for individual capture
-groups.
+needs more than just the `index` of the _match_, but also the start and end indices for individual
+capture groups.
 
 As such, we propose the adoption of an additional `indices` property on the array result (the 
 _substrings array_) of `RegExp.prototype.exec()`. This property would itself be an _indices array_ 
@@ -155,8 +162,8 @@ The following is a high-level list of tasks to progress through each stage of th
 ### Stage 3 Entrance Criteria
 
 * [x] [Complete specification text][Specification].
-* [ ] Designated reviewers have [signed off][Stage3ReviewerSignOff] on the current spec text.
-* [ ] The ECMAScript editor has [signed off][Stage3EditorSignOff] on the current spec text.
+* [x] Designated reviewers have [signed off][Stage3ReviewerSignOff] on the current spec text.
+* [x] The ECMAScript editor has [signed off][Stage3EditorSignOff] on the current spec text.
 
 ### Stage 4 Entrance Criteria
 
@@ -175,12 +182,12 @@ The following is a high-level list of tasks to progress through each stage of th
 [Prose]: #motivations
 [Examples]: #examples
 [API]: #api
-[Specification]: https://tc39.es/proposal-regexp-match-offsets/
+[Specification]: https://tc39.es/proposal-regexp-match-indices/
 
 <!-- The following links should be supplied as the proposal advances: -->
 [Transpiler]: #todo
-[Stage3ReviewerSignOff]: https://github.com/tc39/proposal-regexp-match-offsets/issues/11
-[Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-offsets/issues/11
+[Stage3ReviewerSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
+[Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
 [Test262PullRequest]: #todo
 [Implementation1]: #todo
 [Implementation2]: #todo
