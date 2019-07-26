@@ -30,12 +30,13 @@ steps:
   displayName: 'gulp build'
 
 - script: |
+    echo $(Build.SourcesDirectory)
+    echo $(Build.ArtifactStagingDirectory)
     git rm -rf .
     git clean -fdx
     git fetch origin gh-pages
     git checkout gh-pages
     git clean -fdx
-    touch .nojekyll
     cp -a $(Build.ArtifactStagingDirectory)/. .
     git config user.email "ron.buckton@microsoft.com"
     git config user.name "Ron Buckton"
