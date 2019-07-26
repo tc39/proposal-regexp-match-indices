@@ -1,9 +1,9 @@
 {
-  "name": "proposal-regexp-match-offsets",
+  "name": "proposal-regexp-match-indices",
   "version": "0.0.0",
   "private": true,
-  "description": "RegExp match array offsets for ECMAScript",
-  "homepage": "https://github.com/rbuckton/proposal-regexp-match-offsets#readme",
+  "description": "RegExp Match Indices for ECMAScript",
+  "homepage": "https://github.com/tc39/proposal-regexp-match-indices#readme",
   "author": {
     "name": "Ron Buckton",
     "email": "ron.buckton@microsoft.com"
@@ -16,7 +16,7 @@
     "build": "gulp build",
     "start": "gulp start"
   },
-  "license": "SEE LICENSE IN https://tc39.github.io/ecma262/#sec-copyright-and-software-license",
+  "license": "SEE LICENSE IN https://tc39.es/ecma262/#sec-copyright-and-software-license",
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "@types/gulp": "^4.0.6",
@@ -24,7 +24,8 @@
     "ecmarkup": "^3.16.0",
     "gulp": "^4.0.2",
     "gulp-emu": "^1.2.0",
-    "gulp-live-server": "0.0.31"
+    "gulp-livereload": "^4.0.1",
+    "st": "^1.2.2"
   },
-  "repository": "rbuckton/proposal-regexp-match-offsets"
+  "repository": "tc39/proposal-regexp-match-indices"
 }
