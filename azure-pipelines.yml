@@ -32,7 +32,9 @@ steps:
 - script: |
     git rm -rf .
     git clean -fdx
+    git fetch origin gh-pages
     git checkout gh-pages
+    git clean -fdx
     touch .nojekyll
     cp -a $(Build.ArtifactStagingDirectory)/. .
     git config user.email "ron.buckton@microsoft.com"
