@@ -17,5 +17,21 @@ steps:
 
 - script: |
     npm install
-    gulp default --gulpfile gulpfile.js
-  displayName: 'npm install and run gulp'
+  displayName: 'npm install'
+
+- script: |
+    gulp build
+  env:
+    DOCS_DIR: $(Build.ArtifactStagingDirectory)
+  displayName: 'gulp build'
+
+- script: |
+    git rm -rf .
+    git clean -fdx
+    git checkout gh-pages
+    touch .nojekyll
+    cp -a $(Build.ArtifactStagingDirectory)/. .
+    git add --all
+    git commit -m "(chore) Publish update to gh-pages"
+    git push origin gh-pages;
+  displayName: 'publish gh-pages'
