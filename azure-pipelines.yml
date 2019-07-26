@@ -14,6 +14,11 @@ steps:
   persistCredentials: true
   clean: true
 
+- script: |
+    git config user.email "ron.buckton@microsoft.com"
+    git config user.name "Ron Buckton"
+  displayName: 'configure git user'
+
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
@@ -30,17 +35,21 @@ steps:
   displayName: 'gulp build'
 
 - script: |
-    echo $(Build.SourcesDirectory)
-    echo $(Build.ArtifactStagingDirectory)
-    git rm -rf .
-    git clean -fdx
     git fetch origin gh-pages
-    git checkout gh-pages
+    git checkout gh-pages --force
     git clean -fdx
-    cp -a $(Build.ArtifactStagingDirectory)/. .
-    git config user.email "ron.buckton@microsoft.com"
-    git config user.name "Ron Buckton"
+  displayName: 'checkout gh-pages'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: $(Build.ArtifactStagingDirectory)
+    TargetFolder: $(Build.SourcesDirectory)
+    OverWrite: true
+  displayName: 'Copy built outputs'
+
+- script: |
     git add --all
     git commit -m "(chore) Publish update to gh-pages"
+    git status
     git push origin gh-pages;
   displayName: 'publish gh-pages'
