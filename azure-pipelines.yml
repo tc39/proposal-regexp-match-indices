@@ -10,6 +10,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- checkout: self
+  persistCredentials: true
+  clean: true
+
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
@@ -31,6 +35,8 @@ steps:
     git checkout gh-pages
     touch .nojekyll
     cp -a $(Build.ArtifactStagingDirectory)/. .
+    git config user.email "ron.buckton@microsoft.com"
+    git config user.name "Ron Buckton"
     git add --all
     git commit -m "(chore) Publish update to gh-pages"
     git push origin gh-pages;
