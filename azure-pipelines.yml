@@ -25,23 +25,18 @@ steps:
 
 - script: |
     gulp build
+    ls $(Build.ArtifactStagingDirectory)
   env:
     DOCS_DIR: $(Build.ArtifactStagingDirectory)
   displayName: 'gulp build'
 
-- task: ManualIntervention@8
-  inputs:
-    instructions: 'Paused'
-
 - script: |
     git fetch origin gh-pages
     git checkout gh-pages --force
+    ls $(Build.SourcesDirectory)
     git clean -fdx
+    ls $(Build.SourcesDirectory)
   displayName: 'checkout gh-pages'
-
-- task: ManualIntervention@8
-  inputs:
-    instructions: 'Paused'
 
 - task: CopyFiles@2
   inputs:
@@ -50,13 +45,10 @@ steps:
     OverWrite: true
   displayName: 'Copy built outputs'
 
-- task: ManualIntervention@8
-  inputs:
-    instructions: 'Paused'
-
 - script: |
-    git status
+    ls $(Build.SourcesDirectory)
     git add --all
+    git status
     git commit -m "(chore) Publish update to gh-pages"
-    git push origin gh-pages;
+    git push origin gh-pages
   displayName: 'publish gh-pages'
