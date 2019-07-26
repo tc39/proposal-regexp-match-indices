@@ -11,7 +11,7 @@ steps:
 
 - script: |
     echo "##vso[task.setvariable variable=DocsDirectory]$(Build.ArtifactStagingDirectory)"
-  condition: and(succeeded(), in(variables['Build.SourceBranch'], ['refs/heads/master', 'refs/heads/azure-pipelines']))
+  condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/azure-pipelines'))
   displayName: 'configure publish for CI'
 
 - script: |
