@@ -10,6 +10,22 @@ steps:
   clean: true
 
 - script: |
+    echo "##vso[task.setvariable variable=DocsDirectory]$(Build.ArtifactStagingDirectory)"
+  condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/azure-pipelines'))
+  displayName: 'configure publish for CI'
+
+- script: |
+    echo "##vso[task.setvariable variable=DocsDirectory]$(Build.ArtifactStagingDirectory)/pr/$(System.PullRequest.PullRequestNumber)"
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'), variables['System.PullRequest.PullRequestNumber'])
+  displayName: 'configure publish for PR'
+
+- script: |
+    echo "##vso[task.logissue type=error]Pipeline only supported for CI or PR builds"
+    exit 1
+  condition: and(succeeded(), eq(variables['DocsDirectory'], ''))
+  displayName: 'fail invalid build'
+
+- script: |
     git config user.email "ron.buckton@microsoft.com"
     git config user.name "Ron Buckton"
   displayName: 'configure git user'
@@ -24,21 +40,19 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    ls -la $(Build.SourcesDirectory)/docs
     gulp build
-    ls -la $(Build.SourcesDirectory)/docs
   displayName: 'gulp build'
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: $(Build.SourcesDirectory)/docs
-    TargetFolder: $(Build.ArtifactStagingDirectory)
+    SourceFolder: docs
+    TargetFolder: $(DocsDirectory)
     OverWrite: true
   displayName: 'Copy Build Artifacts'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    PathToPublish: $(Build.ArtifactStagingDirectory)
     ArtifactName: 'drop'
     publishLocation: 'Container'
   displayName: 'Publish Build Artifacts'
@@ -46,9 +60,7 @@ steps:
 - script: |
     git fetch origin gh-pages
     git checkout gh-pages --force
-    ls -la $(Build.SourcesDirectory)
     git clean -fdx
-    ls -la $(Build.SourcesDirectory)
   displayName: 'checkout gh-pages'
 
 - task: CopyFiles@2
@@ -59,7 +71,6 @@ steps:
   displayName: 'Copy built outputs'
 
 - script: |
-    ls -la $(Build.SourcesDirectory)
     git add --all
     git status
     git commit -m "(chore) Publish update to gh-pages"
