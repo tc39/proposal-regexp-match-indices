@@ -8,6 +8,9 @@ const http = require("http");
 const st = require("st");
 
 const DOCS_DIR = process.env.DOCS_DIR || "docs";
+if (DOCS_DIR !== "docs") {
+    console.log(`DOCS_DIR set to '${DOCS_DIR}'`);
+}
 
 const clean = () => del(`${DOCS_DIR}/**/*`);
 gulp.task("clean", clean);
