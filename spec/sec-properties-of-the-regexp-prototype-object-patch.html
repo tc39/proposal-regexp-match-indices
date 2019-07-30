@@ -48,14 +48,14 @@
         1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
         1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
         1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-        1. <ins>Let _indices_ be &laquo; &raquo;.</ins>
+        1. <ins>Let _indices_ be a new empty List.</ins>
         1. <ins>Let _match_ be the Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_ }.</ins>
         1. <ins>Add _match_ as the last element of _indices_.</ins>
         1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _match_).</ins>
         1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
         1. If _R_ contains any |GroupName|, then
           1. Let _groups_ be ObjectCreate(*null*).
-          1. <ins>Let _groupNames_ be &laquo; &raquo;.</ins>
+          1. <ins>Let _groupNames_ be a new empty List.</ins>
         1. Else,
           1. Let _groups_ be *undefined*.
           1. <ins>Let _groupNames_ be *undefined*.</ins>
@@ -81,16 +81,16 @@
               1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
               1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
             1. <ins>Let _capture_ be the Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_ }.</ins>
-            1. <ins>Add _capture_ as the last element of _indices_.</ins>
+            1. <ins>Append _capture_ to _indices_.</ins>
             1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capture_).</ins>
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
           1. If the _i_th capture of _R_ was defined with a |GroupName|, then
             1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
             1. Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).
             1. <ins>Assert: _groupNames_ is a List.</ins>
-            1. <ins>Add _s_ as the last element of _groupNames_.</ins>
+            1. <ins>Append _s_ to _groupNames_.</ins>
           1. <ins>Else,</ins>
-            1. <ins>If _groupNames_ is a List, add *undefined* as the last element of _groupNames_.</ins>
+            1. <ins>If _groupNames_ is a List, append *undefined* to _groupNames_.</ins>
         1. <ins>Set _getIndices_.[[MatchIndices]] to _indices_.</ins>
         1. <ins>Set _getIndices_.[[GroupNames]] to _groupNames_.</ins>
         1. Return _A_.
