@@ -4,7 +4,7 @@
   <emu-clause id="sec-match-records">
     <h1><ins>Match Records</ins></h1>
     <ins>
-    <p>A <dfn>Match</dfn> is a Record value used to encapsulate the start and end indices of a regular expression match along with any associated capture group name.</p>
+    <p>A <dfn>Match</dfn> is a Record value used to encapsulate the start and end indices of a regular expression match or capture.</p>
     <p>Match Records have the fields listed in <emu-xref href="#table-match-record"></emu-xref>.</p>
     </ins>
     <emu-table id="table-match-record" caption="Match Record Fields">
@@ -24,11 +24,6 @@
             <td>[[EndIndex]]</td>
             <td>An integer &ge; [[StartIndex]].</td>
             <td>The number of code units from the start of a string at which the match ends (exclusive).</td>
-          </tr>
-          <tr>
-            <td>[[GroupName]]</td>
-            <td>A String or *undefined*.</td>
-            <td>An associated group name if the match belongs to a named capture group.</td>
           </tr>
         </tbody>
       </table>

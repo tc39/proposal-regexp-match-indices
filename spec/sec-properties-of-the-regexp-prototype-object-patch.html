@@ -6,7 +6,7 @@
     
     <emu-clause id="sec-regexpbuiltinexec" aoid="RegExpBuiltinExec">
       <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ )</h1>
-      <p>The abstract operation RegExpBuiltinExec with arguments _R_<del> and</del><ins>,</ins> _S_ <ins>and _matchOptions_</ins> performs the following steps:</p>
+      <p>The abstract operation RegExpBuiltinExec with arguments _R_ and _S_ performs the following steps:</p>
       <emu-alg>
         1. Assert: _R_ is an initialized RegExp instance.
         1. Assert: Type(_S_) is String.
@@ -48,15 +48,17 @@
         1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
         1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
         1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-        1. <ins>Let _indices_ be the Record { [[Indices]]: &laquo; &raquo; }.</ins>
-        1. <ins>Let _match_ be the Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_, [[GroupName]]: *undefined* }.</ins>
-        1. <ins>Add _match_ as the last element of _indices_.[[Indices]].</ins>
-        1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _match_)</ins>
+        1. <ins>Let _indices_ be a new empty List.</ins>
+        1. <ins>Let _match_ be the Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_ }.</ins>
+        1. <ins>Add _match_ as the last element of _indices_.</ins>
+        1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _match_).</ins>
         1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
         1. If _R_ contains any |GroupName|, then
           1. Let _groups_ be ObjectCreate(*null*).
+          1. <ins>Let _groupNames_ be a new empty List.</ins>
         1. Else,
           1. Let _groups_ be *undefined*.
+          1. <ins>Let _groupNames_ be *undefined*.</ins>
         1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
         1. <ins>Let _getIndices_ be MakeGetIndices(_S_).</ins>
         1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndices_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
@@ -69,29 +71,28 @@
           1. <del>Else _fullUnicode_ is *false*,</del>
             1. <del>Assert: _captureI_ is a List of code units.</del>
             1. <del>Let _capturedValue_ be the String value consisting of the code units of _captureI_.</del>
-          1. <ins>If the _i_th capture of _R_ was defined with a |GroupName|, then</ins>
-            1. <ins>Let _capturedGroup_ be the StringValue of the corresponding |RegExpIdentifierName|.</ins>
-          1. <ins>Else,</ins>
-            1. <ins>Let _capturedGroup_ be *undefined*.</ins>
           1. <ins>If _captureI_ is *undefined*, then</ins>
             1. <ins>Let _capturedValue_ be *undefined*.</ins>
-            1. <ins>Add *undefined* as the last element of _indices_.[[Indices]].</ins>
+            1. <ins>Add *undefined* as the last element of _indices_.</ins>
           1. <ins>Else,</ins>
             1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
             1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
             1. <ins>If _fullUnicode_ is *true*, then</ins>
               1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
               1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
-            1. <ins>Let _capture_ be Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_, [[GroupName]]: _capturedGroup_ }.</ins>
-            1. <ins>Add _capture_ as the last element of _indices_.[[Indices]].</ins>
+            1. <ins>Let _capture_ be the Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_ }.</ins>
+            1. <ins>Append _capture_ to _indices_.</ins>
             1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capture_).</ins>
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
-          1. <del>If the _i_th capture of _R_ was defined with a |GroupName|, then</del>
-            1. <del>Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.</del>
-            1. <del>Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).</del>
-          1. <ins>If _capturedGroup_ is not *undefined*, then</ins>
-            1. <ins>Perform ! CreateDataProperty(_groups_, _capturedGroup_, _capturedValue_).</ins>
+          1. If the _i_th capture of _R_ was defined with a |GroupName|, then
+            1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
+            1. Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).
+            1. <ins>Assert: _groupNames_ is a List.</ins>
+            1. <ins>Append _s_ to _groupNames_.</ins>
+          1. <ins>Else,</ins>
+            1. <ins>If _groupNames_ is a List, append *undefined* to _groupNames_.</ins>
         1. <ins>Set _getIndices_.[[MatchIndices]] to _indices_.</ins>
+        1. <ins>Set _getIndices_.[[GroupNames]] to _groupNames_.</ins>
         1. Return _A_.
       </emu-alg>
     </emu-clause>
@@ -102,7 +103,7 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _Input_ is a List of the code points of _S_ interpreted as a UTF-16 encoded string.
-        1. Assert: _e_ is an integer index within _Input_.
+        1. Assert: _e_ is an integer value &ge; 0 and &lt; the number of elements in _Input_.
         1. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.
         1. Return _eUTF_.
       </emu-alg>
@@ -114,8 +115,8 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _match_ is a Match Record.
-        1. Assert: _match_.[[StartIndex]] is an integer index into _S_.
-        1. Assert: _match_.[[EndIndex]] is an integer index into _S_ that is greater than or equal to _match_.[[StartIndex]].
+        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &lt; the length of _S_.
+        1. Assert: _match_.[[EndIndex]] is an integer value &ge; _match_.[[StartIndex]] and &le; the length of _S_.
         1. Return the portion of _S_ between offset _match_.[[StartIndex]] inclusive and offset _match_.[[EndIndex]] exclusive.
       </emu-alg>
     </emu-clause>
@@ -126,8 +127,8 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _match_ is a Match Record.
-        1. Assert: _match_.[[StartIndex]] is an integer index into _S_.
-        1. Assert: _match_.[[EndIndex]] is an integer index into _S_ that is greater than or equal to _match_.[[StartIndex]].
+        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &lt; the length of _S_.
+        1. Assert: _match_.[[EndIndex]] is an integer value &ge; _match_.[[StartIndex]] and &le; the length of _S_.
         1. Return CreateArrayFromList(&laquo; _match_.[[StartIndex]], _match_.[[EndIndex]] &raquo;).
       </emu-alg>
     </emu-clause>
@@ -138,13 +139,13 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Let _steps_ be the steps of a GetIndices function as specified below.
-        1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[MatchIndices]], [[MatchIndicesArray]] &raquo;).
+        1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[GroupNames]], [[MatchIndices]], [[MatchIndicesArray]] &raquo;).
         1. Set _getter_.[[InputString]] to _S_.
         1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
         1. Return _getter_.
       </emu-alg>
 
-      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[MatchIndices]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
+      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[GroupNames]], [[MatchIndices]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
       <emu-alg>
         1. Let _f_ be the active function object.
         1. Let _A_ be _f_.[[MatchIndicesArray]].
@@ -153,24 +154,26 @@
         1. Let _S_ be _f_.[[InputString]].
         1. Let _indices_ be _f_.[[MatchIndices]].
         1. Assert: _indices_ is a List.
+        1. Let _groupNames_ be _f_.[[GroupNames]].
+        1. Assert: _groupNames_ is a List or is *undefined*.
         1. Let _n_ be the number of elements in _indices_.
         1. Assert: _n_ &lt; 2<sup>32</sup>-1.
         1. Set _A_ to ! ArrayCreate(_n_).
         1. Assert: The value of _A_'s `"length"` property is _n_.
-        1. If there exists an _element_ of _indices_ such that _element_ is a Match Record and _element_.[[GroupName]] is not *undefined*, then
+        1. If _groupNames_ is not *undefined*, then
           1. Let _groups_ be ! ObjectCreate(*null*).
         1. Else,
           1. Let _groups_ be *undefined*.
         1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
         1. For each integer _i_ such that _i_ &ge; 0 and _i_ &lt; _n_, do
-          1. Let _matchIndices_ be _i_<sup>th</sup> element of _indices_.
+          1. Let _matchIndices_ be _indices_[_i_].
           1. If _matchIndices_ is not *undefined*, then
             1. Let _matchIndicesArray_ be ! GetMatchIndicesArray(_S_, _matchIndices_).
-            1. If _matchIndices_.[[GroupName]] is not *undefined*, then
-              1. Perform ! CreateDataProperty(_groups_, _matchIndices_.[[GroupName]], _matchIndicesArray_).
           1. Else,
             1. Let _matchIndicesArray_ be *undefined*.
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _matchIndicesArray_).
+          1. If _groupNames_ is not *undefined* and _groupNames_[_i_] is not *undefined*, then
+            1. Perform ! CreateDataProperty(_groups_, _groupNames_[_i_], _matchIndicesArray_).
         1. Set _f_.[[MatchIndicesArray]] to _A_.
         1. Return _A_.
       </emu-alg>

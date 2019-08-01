@@ -92,11 +92,13 @@
           1. Let <del>_s_</del><ins>_r_</ins> be _cap_[_n_].
           1. If <del>_s_</del><ins>_r_</ins> is *undefined*, return _c_(_x_).
           1. Let _e_ be _x_'s _endIndex_.
-          1. Let _len_ be <del>the number of elements in _s_</del><ins>_r_._endIndex_ - _r_._startIndex_</ins>.
+          1. <ins>Let _rs_ be _r_'s _startIndex_.</ins>
+          1. <ins>Let _re_ be _r_'s _endIndex_.</ins>
+          1. Let _len_ be <del>the number of elements in _s_</del><ins>_re_ - _rs_</ins>.
           1. Let _f_ be _e_ + _direction_ &times; _len_.
           1. If _f_ &lt; 0 or _f_ &gt; _InputLength_, return ~failure~.
           1. Let _g_ be min(_e_, _f_).
-          1. If there exists an integer _i_ between 0 (inclusive) and _len_ (exclusive) such that Canonicalize(<del>_s_[_i_]</del><ins>_Input_[_r_._startIndex_ + _i_]</ins>) is not the same character value as Canonicalize(_Input_[_g_ + _i_]), return ~failure~.
+          1. If there exists an integer _i_ between 0 (inclusive) and _len_ (exclusive) such that Canonicalize(<del>_s_[_i_]</del><ins>_Input_[_rs_ + _i_]</ins>) is not the same character value as Canonicalize(_Input_[_g_ + _i_]), return ~failure~.
           1. Let _y_ be the State (_f_, _cap_).
           1. Call _c_(_y_) and return its result.
       </emu-alg>
