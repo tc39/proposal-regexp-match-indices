@@ -189,7 +189,7 @@ The following is a high-level list of tasks to progress through each stage of th
 [Transpiler]: #todo
 [Stage3ReviewerSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
 [Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
-[Test262PullRequest]: #todo
+[Test262PullRequest]: https://github.com/tc39/test262/pull/2309
 [Implementation1]: #todo
 [Implementation2]: #todo
 [Ecma262PullRequest]: #todo
