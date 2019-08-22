@@ -3,7 +3,7 @@
 
   <emu-clause id="sec-regexp.prototype.exec">
     <h1>RegExp.prototype.exec ( _string_ )</h1>
-    
+
     <emu-clause id="sec-regexpbuiltinexec" aoid="RegExpBuiltinExec">
       <h1>Runtime Semantics: RegExpBuiltinExec ( _R_, _S_ )</h1>
       <p>The abstract operation RegExpBuiltinExec with arguments _R_ and _S_ performs the following steps:</p>
@@ -60,8 +60,6 @@
           1. Let _groups_ be *undefined*.
           1. <ins>Let _groupNames_ be *undefined*.</ins>
         1. Perform ! CreateDataProperty(_A_, `"groups"`, _groups_).
-        1. <ins>Let _getIndices_ be MakeGetIndices(_S_).</ins>
-        1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Get]]: _getIndices_, [[Set]]: *undefined*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
         1. For each integer _i_ such that _i_ &gt; 0 and _i_ &le; _n_, in ascending order, do
           1. Let _captureI_ be _i_<sup>th</sup> element of _r_'s _captures_ List.
           1. <del>If _captureI_ is *undefined*, let _capturedValue_ be *undefined*.</del>
@@ -91,8 +89,9 @@
             1. <ins>Append _s_ to _groupNames_.</ins>
           1. <ins>Else,</ins>
             1. <ins>If _groupNames_ is a List, append *undefined* to _groupNames_.</ins>
-        1. <ins>Set _getIndices_.[[MatchIndices]] to _indices_.</ins>
-        1. <ins>Set _getIndices_.[[GroupNames]] to _groupNames_.</ins>
+        1. <ins>Let _indicesArray_ be MakeIndicesArray(_S_, _indices_, _groupNames_).</ins>
+        1. <ins>Perform ! CreateDataProperty(_A_, `"indices"`, _indicesArray_).</ins>
+        1. <ins>DRAFT NOTE: While the `"indices"` data property is created eagerly in the spec, an implementation may choose to lazily create it if the laziness is unobservable.</ins>
         1. Return _A_.
       </emu-alg>
     </emu-clause>
@@ -133,28 +132,12 @@
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-makegetindices" aoid="MakeGetIndices">
-      <h1><ins>MakeGetIndices ( _S_ )</ins></h1>
-      <p>The abstract operation MakeGetIndices with argument _S_ performs the following steps:</p>
+    <emu-clause id="sec-makeindicesarray" aoid="MakeIndicesArray">
+      <h1><ins>MakeIndicesArray ( _S_ , _indices_, _groupNames_ )</ins></h1>
+      <p>The abstract operation MakeIndicesArray with arguments _S_, _groupNames_, and _indices_ performs the following steps:</p>
       <emu-alg>
         1. Assert: Type(_S_) is String.
-        1. Let _steps_ be the steps of a GetIndices function as specified below.
-        1. Let _getter_ be CreateBuiltinFunction(_steps_, &laquo; [[InputString]], [[GroupNames]], [[MatchIndices]], [[MatchIndicesArray]] &raquo;).
-        1. Set _getter_.[[InputString]] to _S_.
-        1. Set _getter_.[[MatchIndicesArray]] to *undefined*.
-        1. Return _getter_.
-      </emu-alg>
-
-      <p>A <dfn>GetIndices</dfn> function is an anonymous built-in function with [[InputString]], [[GroupNames]], [[MatchIndices]], and [[MatchIndicesArray]] internal slots. When a GetIndices function that expects no arguments is called it performs the following steps:</p>
-      <emu-alg>
-        1. Let _f_ be the active function object.
-        1. Let _A_ be _f_.[[MatchIndicesArray]].
-        1. If _A_ is not *undefined*, then
-          1. Return _A_.
-        1. Let _S_ be _f_.[[InputString]].
-        1. Let _indices_ be _f_.[[MatchIndices]].
         1. Assert: _indices_ is a List.
-        1. Let _groupNames_ be _f_.[[GroupNames]].
         1. Assert: _groupNames_ is a List or is *undefined*.
         1. Let _n_ be the number of elements in _indices_.
         1. Assert: _n_ &lt; 2<sup>32</sup>-1.
@@ -174,7 +157,6 @@
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _matchIndicesArray_).
           1. If _groupNames_ is not *undefined* and _groupNames_[_i_] is not *undefined*, then
             1. Perform ! CreateDataProperty(_groups_, _groupNames_[_i_], _matchIndicesArray_).
-        1. Set _f_.[[MatchIndicesArray]] to _A_.
         1. Return _A_.
       </emu-alg>
     </emu-clause>
