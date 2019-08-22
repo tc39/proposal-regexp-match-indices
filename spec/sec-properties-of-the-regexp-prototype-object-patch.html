@@ -90,7 +90,7 @@
           1. <ins>Else,</ins>
             1. <ins>If _groupNames_ is a List, append *undefined* to _groupNames_.</ins>
         1. <ins>Let _indicesArray_ be MakeIndicesArray(_S_, _indices_, _groupNames_).</ins>
-        1. <ins>Perform ! DefinePropertyOrThrow(_A_, `"indices"`, PropertyDescriptor { [[Value]]: _indicesArray_, [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).</ins>
+        1. <ins>Perform ! CreateDataProperty(_A_, `"indices"`, _indicesArray_).</ins>
         1. <ins>DRAFT NOTE: While the `"indices"` data property is created eagerly in the spec, an implementation may choose to lazily create it if the laziness is unobservable.</ins>
         1. Return _A_.
       </emu-alg>
