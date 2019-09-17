@@ -1,7 +1,7 @@
 <!--#region:intro-->
 # RegExp Match Indices for ECMAScript
 
-ECMAScript `RegExp` Match Indicies provide additional information about the start and end
+ECMAScript `RegExp` Match Indices provide additional information about the start and end
 indices of captured substrings relative to the start of the input string.
 
 > NOTE: This proposal was previously named "RegExp Match Array Offsets", but has been renamed
