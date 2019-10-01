@@ -4,18 +4,11 @@
 ECMAScript `RegExp` Match Indices provide additional information about the start and end
 indices of captured substrings relative to the start of the input string.
 
+A polyfill can be found in the [`regexp-match-indices`](https://www.npmjs.com/package/regexp-match-indices) package on NPM.
+
 > NOTE: This proposal was previously named "RegExp Match Array Offsets", but has been renamed
 > to more accurately represent the current status of the proposal.
 
-<!--
-TODO: Update the polyfill
-
-An example implementation can be found in [`regexp-measure`](https://www.npmjs.com/package/regexp-measure).
-> NOTE: `regexp-measure` was built around the Stage 0 proposal and is no longer up to date with respect to
-> the current proposed API design.
-
-* [Stage 0 Presentation](https://docs.google.com/presentation/d/12I8W-uViPXuFu2IAk3yZpXTr5MxLYxCfhJValykyT0E/edit?usp=sharing)
--->
 <!--#endregion:intro-->
 
 <!--#region:status-->
@@ -167,10 +160,10 @@ The following is a high-level list of tasks to progress through each stage of th
 
 ### Stage 4 Entrance Criteria
 
-* [ ] [Test262](https://github.com/tc39/test262) acceptance tests have been written for mainline usage scenarios and [merged][Test262PullRequest].
+* [x] [Test262](https://github.com/tc39/test262) acceptance tests have been written for mainline usage scenarios and [merged][Test262PullRequest].
 * [ ] Two compatible implementations which pass the acceptance tests: [\[1\]][Implementation1], [\[2\]][Implementation2].
     * V8 v7.8, behind the `--harmony-regexp-match-indices` flag ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548))
-* [ ] A [pull request][Ecma262PullRequest] has been sent to tc39/ecma262 with the integrated spec text.
+* [x] A [pull request][Ecma262PullRequest] has been sent to tc39/ecma262 with the integrated spec text.
 * [ ] The ECMAScript editor has signed off on the [pull request][Ecma262PullRequest].
 <!--#endregion:todo-->
 
@@ -190,7 +183,7 @@ The following is a high-level list of tasks to progress through each stage of th
 [Stage3ReviewerSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
 [Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
 [Test262PullRequest]: https://github.com/tc39/test262/pull/2309
-[Implementation1]: #todo
+[Implementation1]: https://bugs.chromium.org/p/v8/issues/detail?id=9548
 [Implementation2]: #todo
-[Ecma262PullRequest]: #todo
+[Ecma262PullRequest]: https://github.com/tc39/ecma262/pull/1713
 <!--#endregion:links-->
