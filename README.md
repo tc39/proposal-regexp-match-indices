@@ -161,10 +161,12 @@ The following is a high-level list of tasks to progress through each stage of th
 ### Stage 4 Entrance Criteria
 
 * [x] [Test262](https://github.com/tc39/test262) acceptance tests have been written for mainline usage scenarios and [merged][Test262PullRequest].
-* [ ] Two compatible implementations which pass the acceptance tests: [\[1\]][Implementation1], [\[2\]][Implementation2].
-    * V8 v7.8, behind the `--harmony-regexp-match-indices` flag ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548))
+* [ ] Two compatible implementations which pass the acceptance tests:
+    * [x] V8 ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548)) &mdash; Implemented in v7.8 behind the `--harmony-regexp-match-indices` flag
+    * [ ] SpiderMonkey ([tracking bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1519483)) &mdash; Not yet implemented.
+    * [ ] JavaScriptCore ([tracking bug](https://bugs.webkit.org/show_bug.cgi?id=202475)) &mdash; Not yet implemented.
 * [x] A [pull request][Ecma262PullRequest] has been sent to tc39/ecma262 with the integrated spec text.
-* [ ] The ECMAScript editor has signed off on the [pull request][Ecma262PullRequest].
+* [x] The ECMAScript editor has signed off on the [pull request][Ecma262PullRequest].
 <!--#endregion:todo-->
 
 <!--#region:links-->
