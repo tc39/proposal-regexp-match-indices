@@ -165,6 +165,7 @@ The following is a high-level list of tasks to progress through each stage of th
     * [x] V8 ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548)) &mdash; Implemented in v7.8 behind the `--harmony-regexp-match-indices` flag
     * [ ] SpiderMonkey ([tracking bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1519483)) &mdash; Not yet implemented.
     * [ ] JavaScriptCore ([tracking bug](https://bugs.webkit.org/show_bug.cgi?id=202475)) &mdash; Not yet implemented.
+    * [x] Engine262 ([pull request](https://github.com/engine262/engine262/pull/99))
 * [x] A [pull request][Ecma262PullRequest] has been sent to tc39/ecma262 with the integrated spec text.
 * [x] The ECMAScript editor has signed off on the [pull request][Ecma262PullRequest].
 <!--#endregion:todo-->
@@ -186,6 +187,6 @@ The following is a high-level list of tasks to progress through each stage of th
 [Stage3EditorSignOff]: https://github.com/tc39/proposal-regexp-match-indices/issues/11
 [Test262PullRequest]: https://github.com/tc39/test262/pull/2309
 [Implementation1]: https://bugs.chromium.org/p/v8/issues/detail?id=9548
-[Implementation2]: #todo
+[Implementation2]: https://github.com/engine262/engine262/pull/99
 [Ecma262PullRequest]: https://github.com/tc39/ecma262/pull/1713
 <!--#endregion:links-->
