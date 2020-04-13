@@ -102,7 +102,7 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _Input_ is a List of the code points of _S_ interpreted as a UTF-16 encoded string.
-        1. Assert: _e_ is an integer value &ge; 0 and &lt; the number of elements in _Input_.
+        1. Assert: _e_ is an integer value &ge; 0.
         1. Let _eUTF_ be the smallest index into _S_ that corresponds to the character at element _e_ of _Input_. If _e_ is greater than or equal to the number of elements in _Input_, then _eUTF_ is the number of code units in _S_.
         1. Return _eUTF_.
       </emu-alg>
