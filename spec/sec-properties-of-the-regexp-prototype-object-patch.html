@@ -15,6 +15,7 @@
         1. Let _flags_ be _R_.[[OriginalFlags]].
         1. If _flags_ contains `"g"`, let _global_ be *true*, else let _global_ be *false*.
         1. If _flags_ contains `"y"`, let _sticky_ be *true*, else let _sticky_ be *false*.
+        1. <ins>If _flags_ contains `"d"`, let _indices_ be a new empty List, else let _indices_ be *undefined*.</ins>
         1. If _global_ is *false* and _sticky_ is *false*, set _lastIndex_ to 0.
         1. Let _matcher_ be _R_.[[RegExpMatcher]].
         1. If _flags_ contains `"u"`, let _fullUnicode_ be *true*, else let _fullUnicode_ be *false*.
@@ -48,14 +49,14 @@
         1. Perform ! CreateDataProperty(_A_, `"index"`, _lastIndex_).
         1. Perform ! CreateDataProperty(_A_, `"input"`, _S_).
         1. <del>Let _matchedSubstr_ be the matched substring (i.e. the portion of _S_ between offset _lastIndex_ inclusive and offset _e_ exclusive).</del>
-        1. <ins>Let _indices_ be a new empty List.</ins>
         1. <ins>Let _match_ be the Match { [[StartIndex]]: _lastIndex_, [[EndIndex]]: _e_ }.</ins>
-        1. <ins>Add _match_ as the last element of _indices_.</ins>
+        1. <ins>If _indices_ is a List, then</ins>
+          1. <ins>Add _match_ as the last element of _indices_.</ins>
         1. <ins>Let _matchedValue_ be ! GetMatchString(_S_, _match_).</ins>
         1. Perform ! CreateDataProperty(_A_, `"0"`, <del>_matchedSubstr_</del><ins>_matchedValue_</ins>).
         1. If _R_ contains any |GroupName|, then
           1. Let _groups_ be ObjectCreate(*null*).
-          1. <ins>Let _groupNames_ be a new empty List.</ins>
+          1. <ins>If _indices_ is a List, let _groupNames_ be a new empty List.</ins>
         1. Else,
           1. Let _groups_ be *undefined*.
           1. <ins>Let _groupNames_ be *undefined*.</ins>
@@ -71,7 +72,7 @@
             1. <del>Let _capturedValue_ be the String value consisting of the code units of _captureI_.</del>
           1. <ins>If _captureI_ is *undefined*, then</ins>
             1. <ins>Let _capturedValue_ be *undefined*.</ins>
-            1. <ins>Add *undefined* as the last element of _indices_.</ins>
+            1. <ins>If _indices_ is a List, append *undefined* to _indices_.</ins>
           1. <ins>Else,</ins>
             1. <ins>Let _captureStart_ be _captureI_'s _startIndex_.</ins>
             1. <ins>Let _captureEnd_ be _captureI_'s _endIndex_.</ins>
@@ -79,19 +80,20 @@
               1. <ins>Set _captureStart_ to ! GetStringIndex(_S_, _Input_, _captureStart_).</ins>
               1. <ins>Set _captureEnd_ to ! GetStringIndex(_S_, _Input_, _captureEnd_).</ins>
             1. <ins>Let _capture_ be the Match { [[StartIndex]]: _captureStart_, [[EndIndex]:: _captureEnd_ }.</ins>
-            1. <ins>Append _capture_ to _indices_.</ins>
             1. <ins>Let _capturedValue_ be ! GetMatchString(_S_, _capture_).</ins>
+            1. <ins>If _indices_ is a List, append _capture_ to _indices_.</ins>
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _capturedValue_).
           1. If the _i_th capture of _R_ was defined with a |GroupName|, then
             1. Let _s_ be the StringValue of the corresponding |RegExpIdentifierName|.
             1. Perform ! CreateDataProperty(_groups_, _s_, _capturedValue_).
-            1. <ins>Assert: _groupNames_ is a List.</ins>
-            1. <ins>Append _s_ to _groupNames_.</ins>
+            1. <ins>If _indices_ is a List, then</ins>
+              1. <ins>Assert: _groupNames_ is a List.</ins>
+              1. <ins>Append _s_ to _groupNames_.</ins>
           1. <ins>Else,</ins>
             1. <ins>If _groupNames_ is a List, append *undefined* to _groupNames_.</ins>
-        1. <ins>Let _indicesArray_ be MakeIndicesArray(_S_, _indices_, _groupNames_).</ins>
-        1. <ins>Perform ! CreateDataProperty(_A_, `"indices"`, _indicesArray_).</ins>
-        1. <ins>DRAFT NOTE: While the `"indices"` data property is created eagerly in the spec, an implementation may choose to lazily create it if the laziness is unobservable.</ins>
+        1. <ins>If _indices_ is a List, then</ins>
+          1. <ins>Let _indicesArray_ be MakeIndicesArray(_S_, _indices_, _groupNames_).</ins>
+          1. <ins>Perform ! CreateDataProperty(_A_, `"indices"`, _indicesArray_).</ins>
         1. Return _A_.
       </emu-alg>
     </emu-clause>
@@ -160,5 +162,20 @@
         1. Return _A_.
       </emu-alg>
     </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-get-regexp.prototype.indices">
+    <h1><ins>get RegExp.prototype.indices</ins></h1>
+    <p>`RegExp.prototype.indices` is an accessor property whose set accessor function is *undefined*. Its get accessor function performs the following steps:</p>
+    <emu-alg>
+      1. Let _R_ be the *this* value.
+      1. If Type(_R_) is not Object, throw a *TypeError* exception.
+      1. If _R_ does not have an [[OriginalFlags]] internal slot, then
+        1. If SameValue(_R_, %RegExp.prototype%) is *true*, return *undefined*.
+        1. Otherwise, throw a *TypeError* exception.
+      1. Let _flags_ be _R_.[[OriginalFlags]].
+      1. If _flags_ contains the code unit 0x0064 (LATIN SMALL LETTER D), return *true*.
+      1. Return *false*.
+    </emu-alg>
   </emu-clause>
 </emu-clause>

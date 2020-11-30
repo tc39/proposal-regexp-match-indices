@@ -47,6 +47,8 @@ groups would be `undefined`, similar to their corresponding element in the _subs
 In addition, the _indices array_ would itself have a `groups` property containing the start and end
 indices for each named capture group.
 
+> NOTE: For performance reasons, `indices` will only be added to the result if the `d` flag is specified.
+
 <!--#endregion:motivations-->
 
 <!--#region:prior-art-->
@@ -70,7 +72,7 @@ indices for each named capture group.
 # Examples
 
 ```js
-const re1 = /a+(?<Z>z)?/;
+const re1 = /a+(?<Z>z)?/d;
 
 // indices are relative to start of the input string:
 const s1 = "xaaaz";
