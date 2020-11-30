@@ -114,7 +114,7 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _match_ is a Match Record.
-        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &lt; the length of _S_.
+        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &le; the length of _S_.
         1. Assert: _match_.[[EndIndex]] is an integer value &ge; _match_.[[StartIndex]] and &le; the length of _S_.
         1. Return the portion of _S_ between offset _match_.[[StartIndex]] inclusive and offset _match_.[[EndIndex]] exclusive.
       </emu-alg>
@@ -126,7 +126,7 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _match_ is a Match Record.
-        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &lt; the length of _S_.
+        1. Assert: _match_.[[StartIndex]] is an integer value &ge; 0 and &le; the length of _S_.
         1. Assert: _match_.[[EndIndex]] is an integer value &ge; _match_.[[StartIndex]] and &le; the length of _S_.
         1. Return CreateArrayFromList(&laquo; _match_.[[StartIndex]], _match_.[[EndIndex]] &raquo;).
       </emu-alg>
