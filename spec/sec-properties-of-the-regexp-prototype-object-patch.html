@@ -157,7 +157,7 @@
           1. Else,
             1. Let _matchIndicesArray_ be *undefined*.
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _matchIndicesArray_).
-          1. If _hasGroups_ is *true* and _groupNames_[_i_] is not *undefined*, then
+          1. If _groupNames_[_i_] is not *undefined*, then
             1. Perform ! CreateDataProperty(_groups_, _groupNames_[_i_], _matchIndicesArray_).
         1. Return _A_.
       </emu-alg>
