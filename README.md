@@ -50,6 +50,22 @@ indices for each named capture group.
 
 > NOTE: For performance reasons, `indices` will only be added to the result if the `d` flag is specified.
 
+## Why Use `d` For the RegExp Flag
+
+We chose `d` due to its presence in the word `indices`, which is the basis for the naming of the feature (i.e.,
+`lastIndex` on a RegExp, `index` on a match, etc. The character `i` is already in use for ignore-case, and `n` has
+precedence in other engines for handling capturing vs. non-capturing groups. This is similar to the "sticky" flag 
+using the `y` character, since `s` was used for dot-all.
+
+**Why not use `o` and `offsets` instead of `d` and `indices`?** Our goal is to align the name of the property 
+with the existing nomenclature on RegExp (i.e., `lastIndex` and `index`).
+
+**Does `d` have a different meaning in other engines?** Yes and no. For the few engines that *do* have a `d` flag 
+(Onigmo, Perl, and java.util.regex), the meanings differ. Onigmo and Perl both use the `d` flag for 
+backwards-compatiblity (and Perl's documentation seems strongly worded towards discouraging its use), while 
+java.util.regex uses `d` for the treatment of new-line handling. You can find a full list of the flags supported 
+by 46 different RegExp engines in [flags_comparison.md](./flags_comparison.md).
+
 <!--#endregion:motivations-->
 
 <!--#region:prior-art-->
