@@ -140,10 +140,11 @@
       <emu-alg>
         1. Assert: Type(_S_) is String.
         1. Assert: _indices_ is a List.
-        1. Assert: _groupNames_ is a List or is *undefined*.
         1. Assert: Type(_hasGroups_) is Boolean. 
         1. Let _n_ be the number of elements in _indices_.
         1. Assert: _n_ &lt; 2<sup>32</sup>-1.
+        1. Assert: _groupNames_ is a List with _n_ - 1 elements.
+        1. NOTE: The _groupNames_ List contains elements aligned with the _indices_ List starting at _indices_[1].
         1. Set _A_ to ! ArrayCreate(_n_).
         1. Assert: The value of _A_'s `"length"` property is _n_.
         1. If _hasGroups_ is *true*, then
@@ -158,8 +159,8 @@
           1. Else,
             1. Let _matchIndicesArray_ be *undefined*.
           1. Perform ! CreateDataProperty(_A_, ! ToString(_i_), _matchIndicesArray_).
-          1. If _groupNames_[_i_] is not *undefined*, then
-            1. Perform ! CreateDataProperty(_groups_, _groupNames_[_i_], _matchIndicesArray_).
+          1. If _i_ &gt; 0 and _groupNames_[_i_ - 1] is not *undefined*, then
+            1. Perform ! CreateDataProperty(_groups_, _groupNames_[_i_ - 1], _matchIndicesArray_).
         1. Return _A_.
       </emu-alg>
     </emu-clause>
