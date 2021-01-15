@@ -41,7 +41,8 @@ needs more than just the `index` of the _match_, but also the start and end indi
 capture groups.
 
 As such, we propose the adoption of an additional `indices` property on the array result (the 
-_substrings array_) of `RegExp.prototype.exec()`. This property would itself be an _indices array_ 
+_substrings array_) of the RegExpBuiltInExec abstract operation (and thus the result from 
+`RegExp.prototype.exec()`, `String.prototype.match`, etc.). This property would itself be an _indices array_ 
 containing a pair of start and end indices for each captured substring. Any _unmatched_ capture 
 groups would be `undefined`, similar to their corresponding element in the _substrings array_. 
 In addition, the _indices array_ would itself have a `groups` property containing the start and end
