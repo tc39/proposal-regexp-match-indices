@@ -180,11 +180,11 @@ The following is a high-level list of tasks to progress through each stage of th
 ### Stage 4 Entrance Criteria
 
 * [x] [Test262](https://github.com/tc39/test262) acceptance tests have been written for mainline usage scenarios and [merged][Test262PullRequest]. 
-* [ ] Two compatible implementations which pass the acceptance tests:
-    * [x] V8 ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548)) &mdash; Implemented in v7.8 behind the `--harmony-regexp-match-indices` flag
-    * [ ] SpiderMonkey ([tracking bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1519483)) &mdash; Not yet implemented.
-    * [x] JavaScriptCore ([tracking bug](https://bugs.webkit.org/show_bug.cgi?id=202475)) &mdash; Implemented.
-    * [x] Engine262 ([pull request](https://github.com/engine262/engine262/pull/99))
+* [x] Two compatible implementations which pass the acceptance tests:
+    * [x] V8 ([tracking bug](https://bugs.chromium.org/p/v8/issues/detail?id=9548)) &mdash; Shipping in Chrome Canary 91 (V8 v9.0.259)
+    * [x] SpiderMonkey ([tracking bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1519483)) &mdash; Shipping in Firefox Nightly 88
+    * [x] JavaScriptCore ([tracking bug](https://bugs.webkit.org/show_bug.cgi?id=202475)) &mdash; Shipping in Safari Technology Preview 122
+    * [x] Engine262 ([PR#1](https://github.com/engine262/engine262/pull/99), [PR#2](https://github.com/engine262/engine262/pull/161))
 * [x] A [pull request][Ecma262PullRequest] has been sent to tc39/ecma262 with the integrated spec text.
 * [x] The ECMAScript editor has signed off on the [pull request][Ecma262PullRequest].
 <!--#endregion:todo-->
