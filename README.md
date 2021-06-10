@@ -14,7 +14,7 @@ A polyfill can be found in the [`regexp-match-indices`](https://www.npmjs.com/pa
 <!--#region:status-->
 ## Status
 
-**Stage:** 3
+**Stage:** 4
 **Champion:** Ron Buckton (@rbuckton)
 
 _For detailed status of this proposal see [TODO](#todo), below._
